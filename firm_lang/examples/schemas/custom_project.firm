@@ -1,0 +1,63 @@
+schema custom_project {
+    field {
+        name = "name"
+        type = "string"
+        required = true
+    }
+
+    field {
+        name = "status"
+        type = "string"
+        required = true
+    }
+
+    field {
+        name = "budget"
+        type = "currency"
+        required = false
+    }
+
+    field {
+        name = "start_date"
+        type = "date"
+        required = false
+    }
+}
+
+schema custom_contact {
+    field {
+        name = "person_ref"
+        type = "reference"
+        required = true
+    }
+
+    field {
+        name = "organization_ref"
+        type = "reference"
+        required = true
+    }
+
+    field {
+        name = "relationship_type"
+        type = "string"
+        required = true
+    }
+
+    field {
+        name = "role"
+        type = "string"
+        required = false
+    }
+
+    field {
+        name = "decision_maker"
+        type = "boolean"
+        required = false
+    }
+
+    field {
+        name = "estimated_budget"
+        type = "currency"
+        required = false
+    }
+}

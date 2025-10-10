@@ -1,0 +1,25 @@
+schema custom_project {
+    field {
+        name = "name"
+        type = "string"
+        required = true
+    }
+
+    field {
+        name = "status"
+        type = "string"
+        required = true
+    }
+
+    field {
+        name = "budget"
+        type = "currency"
+        required = false
+    }
+
+    field {
+        name = "start_date"
+        type = "datetime"
+        required = false
+    }
+}

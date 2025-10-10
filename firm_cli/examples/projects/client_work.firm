@@ -1,0 +1,92 @@
+// Client projects for 42futures
+// Examples of project entities with different statuses
+
+custom_project banking_integration {
+    name = "Banking Data Platform"
+    organization_ref = organization.main
+    client_ref = organization.financial_services_inc
+
+    status = "In Progress"
+    priority = 1
+    start_date = 2024-02-01
+    estimated_completion = 2024-08-31
+    budget = 180000 EUR
+
+    description = """
+    Custom data integration platform for banking operations.
+    Building domain-specific language for financial data transformations.
+    """
+
+    technologies = ["Rust", "PostgreSQL", "Custom DSL"]
+    team_lead = custom_employee.daniel_rothmann
+}
+
+custom_project logistics_optimizer {
+    name = "Supply Chain Optimizer"
+    organization_ref = organization.main
+    client_ref = organization.logistics_corp
+
+    status = "Planning"
+    priority = 2
+    start_date = 2024-07-01
+    estimated_completion = 2025-01-31
+    budget = 250000 EUR
+
+    description = """
+    AI-powered supply chain optimization with custom modeling language
+    for routing and logistics operations.
+    """
+
+    technologies = ["Rust", "Python", "Custom DSL"]
+    probability = 0.8
+}
+
+custom_project compliance_system {
+    name = "Compliance Automation"
+    organization_ref = organization.main
+    client_ref = organization.financial_services_inc
+
+    status = "Completed"
+    completion_date = 2024-01-15
+    budget = 120000 EUR
+    final_revenue = 118000 EUR
+
+    description = """
+    Automated compliance reporting with custom DSL for
+    regulatory rule definitions.
+    """
+
+    client_satisfaction = 9.2
+    referral_generated = true
+}
+
+// Client organizations
+organization financial_services_inc {
+    name = "Financial Services Inc"
+    industry_ref = industry.financial_services
+    primary_email = "contact@financialservices.com"
+    address = "Copenhagen, Denmark"
+    vat_id = "DK99887766"
+}
+
+organization logistics_corp {
+    name = "Logistics Corp"
+    industry_ref = industry.logistics
+    primary_email = "info@logisticscorp.com"
+    address = "Aalborg, Denmark"
+    vat_id = "DK44556677"
+}
+
+industry financial_services {
+    name = "Financial Services"
+    sector = "Finance and Insurance"
+    classification_code = "64.99"
+    classification_system = "NACE"
+}
+
+industry logistics {
+    name = "Logistics and Transportation"
+    sector = "Transportation and Storage"
+    classification_code = "52.29"
+    classification_system = "NACE"
+}

@@ -1,0 +1,3 @@
+[submodule "tree-sitter-firm"]
+	path = tree-sitter-firm
+	url = https://github.com/42futures/tree-sitter-firm.git

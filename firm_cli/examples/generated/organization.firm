@@ -1,0 +1,3 @@
+organization myorg {
+    name = "My Org"
+}
