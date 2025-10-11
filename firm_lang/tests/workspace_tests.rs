@@ -11,7 +11,7 @@ mod tests {
     #[test]
     fn test_load_single_file() {
         let mut workspace = Workspace::new();
-        let path = PathBuf::from("examples/profile.firm");
+        let path = PathBuf::from("../examples/profile.firm");
 
         let result = workspace.load_file(&path);
         assert!(result.is_ok(), "Should load example file successfully");
