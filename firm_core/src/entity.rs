@@ -1,3 +1,4 @@
+use convert_case::{Case, Casing};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt};
 
@@ -40,9 +41,13 @@ impl Entity {
 impl fmt::Display for Entity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "ID: {}", self.id)?;
-        writeln!(f, "Fields:")?;
         for (field_id, field_value) in &self.fields {
-            writeln!(f, "  - {}: {}", field_id, field_value)?;
+            writeln!(
+                f,
+                "{}: {}",
+                field_id.as_str().to_case(Case::Sentence),
+                field_value
+            )?;
         }
 
         Ok(())
