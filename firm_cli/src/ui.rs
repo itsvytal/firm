@@ -1,7 +1,8 @@
-use std::time::Duration;
-
+use clap::ValueEnum;
 use console::Style;
+use firm_core::Entity;
 use indicatif::{ProgressBar, ProgressStyle};
+use std::{fmt, time::Duration};
 
 use super::logging;
 
@@ -92,6 +93,42 @@ pub fn progress_bar(len: u64) -> ProgressBar {
     tracker.add(pb.clone());
 
     pb
+}
+
+#[derive(Clone, Debug, ValueEnum, PartialEq)]
+pub enum OutputFormat {
+    Pretty,
+    Json,
+}
+
+impl fmt::Display for OutputFormat {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            OutputFormat::Pretty => write!(f, "pretty"),
+            OutputFormat::Json => write!(f, "json"),
+        }
+    }
+}
+
+impl Default for OutputFormat {
+    fn default() -> Self {
+        OutputFormat::Pretty
+    }
+}
+
+pub fn pretty_output_entity_single(entity: &Entity) {
+    println!("\n{}", entity);
+}
+
+pub fn pretty_output_entity_list(entities: &Vec<&Entity>) {
+    for (i, entity) in entities.iter().enumerate() {
+        pretty_output_entity_single(entity);
+
+        // Add a separator after each entity, except for the last one.
+        if i < entities.len() - 1 {
+            println!("---------------------------------------");
+        }
+    }
 }
 
 pub fn json_output<T: serde::Serialize>(data: &T) {

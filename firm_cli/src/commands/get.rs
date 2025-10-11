@@ -6,16 +6,15 @@ use firm_lang::workspace::Workspace;
 use crate::errors::CliError;
 use crate::files::load_current_graph;
 use crate::query::CliDirection;
-use crate::ui::{self};
+use crate::ui::{self, OutputFormat};
 
-use super::{
-    build_workspace, load_workspace_files,
-};
+use super::{build_workspace, load_workspace_files};
 
 pub fn get_entity_by_id(
     workspace_path: &PathBuf,
     entity_type: String,
     entity_id: String,
+    output_format: OutputFormat,
 ) -> Result<(), CliError> {
     ui::header("Getting entity by ID");
     let graph = load_current_graph(&workspace_path)?;
@@ -28,7 +27,10 @@ pub fn get_entity_by_id(
                 entity_type, entity_id
             ));
 
-            ui::json_output(entity);
+            match output_format {
+                ui::OutputFormat::Pretty => ui::pretty_output_entity_single(entity),
+                ui::OutputFormat::Json => ui::json_output(entity),
+            }
         }
         None => {
             ui::error(&format!(
@@ -48,6 +50,7 @@ pub fn get_related_entities(
     entity_type: String,
     entity_id: String,
     direction: Option<CliDirection>,
+    output_format: OutputFormat,
 ) -> Result<(), CliError> {
     ui::header("Getting related entities");
     let graph = load_current_graph(&workspace_path)?;
@@ -69,7 +72,11 @@ pub fn get_related_entities(
                 entity_id
             ));
 
-            ui::json_output(&entities);
+            match output_format {
+                OutputFormat::Pretty => ui::pretty_output_entity_list(&entities),
+                OutputFormat::Json => ui::json_output(&entities),
+            }
+
             Ok(())
         }
         None => {
@@ -83,9 +90,7 @@ pub fn get_related_entities(
     }
 }
 
-pub fn list_schemas(
-    workspace_path: &PathBuf,
-) -> Result<(), CliError> {
+pub fn list_schemas(workspace_path: &PathBuf) -> Result<(), CliError> {
     ui::header("Listing schemas");
     let mut workspace = Workspace::new();
     load_workspace_files(&workspace_path, &mut workspace).map_err(|_| CliError::BuildError)?;
@@ -103,6 +108,7 @@ pub fn list_schemas(
 pub fn list_entities_by_type(
     workspace_path: &PathBuf,
     entity_type: String,
+    output_format: OutputFormat,
 ) -> Result<(), CliError> {
     ui::header("Listing entities by type");
     let graph = load_current_graph(&workspace_path)?;
@@ -114,6 +120,10 @@ pub fn list_entities_by_type(
         entity_type,
     ));
 
-    ui::json_output(&entities);
+    match output_format {
+        OutputFormat::Pretty => ui::pretty_output_entity_list(&entities),
+        OutputFormat::Json => ui::json_output(&entities),
+    }
+
     Ok(())
 }

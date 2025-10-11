@@ -11,6 +11,7 @@ use std::{path::PathBuf, process::ExitCode};
 use commands::build_and_save_graph;
 use files::get_workspace_path;
 use query::CliDirection;
+use ui::OutputFormat;
 
 #[derive(Parser, Debug)]
 #[command(name = "firm")]
@@ -27,6 +28,10 @@ struct Cli {
     /// Enable verbose output
     #[arg(short, long, global = true)]
     verbose: bool,
+
+    /// Output format
+    #[arg(short, long, global = true, default_value_t = OutputFormat::default())]
+    format: OutputFormat,
 
     #[command(subcommand)]
     command: Commands,
@@ -94,19 +99,25 @@ fn main() -> ExitCode {
         Commands::Get {
             entity_type,
             entity_id,
-        } => commands::get_entity_by_id(&workspace_path, entity_type, entity_id),
+        } => commands::get_entity_by_id(&workspace_path, entity_type, entity_id, cli.format),
         Commands::List { entity_type } => {
             if entity_type == "schema" {
                 commands::list_schemas(&workspace_path)
             } else {
-                commands::list_entities_by_type(&workspace_path, entity_type)
+                commands::list_entities_by_type(&workspace_path, entity_type, cli.format)
             }
         }
         Commands::Related {
             entity_type,
             entity_id,
             direction,
-        } => commands::get_related_entities(&workspace_path, entity_type, entity_id, direction),
+        } => commands::get_related_entities(
+            &workspace_path,
+            entity_type,
+            entity_id,
+            direction,
+            cli.format,
+        ),
         Commands::Add { to_file } => commands::add_entity(&workspace_path, to_file),
     };
 
