@@ -3,8 +3,8 @@
 //! This module provides types and utilities for defining entity schemas,
 //! including field types, constraints, and validation rules.
 
+use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt::Display};
-use serde::{Serialize, Deserialize};
 
 use crate::{EntityType, FieldId, FieldType};
 
@@ -80,7 +80,15 @@ impl EntitySchema {
 
 impl Display for EntitySchema {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.entity_type)
+        writeln!(f, "{}", self.entity_type)?;
+
+        for (field_id, field_schema) in &self.fields {
+            writeln!(f, "\n{}", field_id)?;
+            writeln!(f, "- Type: {}", field_schema.expected_type())?;
+            writeln!(f, "- Required: {}", field_schema.is_required())?;
+        }
+
+        Ok(())
     }
 }
 
