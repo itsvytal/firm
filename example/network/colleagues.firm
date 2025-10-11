@@ -1,0 +1,46 @@
+person john_doe {
+    name = "John Doe"
+    urls = ["https://www.linkedin.com/in/johndoe/"]
+
+    created_at = 2025-09-30 at 09:45 UTC+2
+}
+
+contact john_doe {
+    person_ref = person.john_doe
+    role = "Head of Rocket Science"
+    status = "Former Colleague"
+
+    notes = "From Acme Corp. Heads up rocket science team at Globex Inc today."
+    created_at = 2025-09-30 at 09:45 UTC+2
+}
+
+interaction john_checkin {
+    interaction_date = 2025-09-29 at 11:05 UTC+2
+
+    channel_ref = channel.linkedin_organic
+    initiator_ref = person.daniel_rothmann
+    primary_contact_ref = contact.john_doe
+
+    type = "LinkedIn Chat"
+    subject = "Check-in"
+    outcome = "I met John at a conference, and we agreed a catch up was due. I've sent him a message on LinkedIn, waiting to hear back."
+
+    created_at = 2025-09-30 at 10:10 UTC+2
+}
+
+task john_checkin_follow_up {
+    name = "Follow up with John"
+    description = """
+        At a conference, John gave clear intent that he wanted to meet.
+        So if I don't hear back on LinkedIn, I should casually follow up.
+        John is an important contact, so worth the effort to stay connected.
+    """
+
+    source_ref = interaction.john_checkin
+    assignee_ref = person.daniel_rothmann
+
+    due_date = 2025-10-10
+    is_completed = true
+
+    created_at = 2025-09-30 at 10:15 UTC+2
+}

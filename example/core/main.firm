@@ -1,0 +1,18 @@
+organization main {
+    name = "42futures"
+    email = "daniel@42futures.com"
+    urls = ["42futures.com", "blog.42futures.com"]
+    industry_ref = industry.software_development
+
+    notes = "Central point of this Firm workspace."
+    created_at = 2025-08-31 at 13:45 UTC+2
+}
+
+person daniel_rothmann {
+    name = "Daniel Rothmann"
+    email = "daniel@42futures.com"
+    urls = ["https://www.linkedin.com/danielrothmann"]
+
+    notes = "Owner of 42futures."
+    created_at = 2025-08-31 at 13:45 UTC+2
+}

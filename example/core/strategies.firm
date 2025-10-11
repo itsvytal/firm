@@ -1,0 +1,33 @@
+strategy positioning {
+    name = "42futures positioning strategy"
+    source_ref = organization.main
+    owner_ref = person.daniel_rothmann
+    description = """
+        # Market Position: "Practical Software R&D"
+        Structured 8-week technical validation for high-stakes decisions.
+
+        ## Hook
+        "I help you answer high-stakes technical questions in 8 weeks. With working code."
+
+        ## Target
+        CTOs and technology leaders facing new technology decisions (AI integration, architecture modernization, build-vs-buy)
+
+        ## Differentiation
+        Not strategy consulting (just PowerPoints) or dev shops (just build). Evidence-first validation through working software before committing big.
+
+        ## Value Proposition
+        Replace guesswork with evidence. De-risk technical bets through structured 3-phase pilot (Hypothesis → Experiment → Model).
+
+        ## Competitive Advantage
+        - Fixed 8-week timeline vs months/quarters of internal R&D
+        - Working code + production-ready foundations vs recommendations
+        - Unbiased perspective (no vendor ties, can recommend "stop")
+        - Flexible engagement (phase-by-phase or full pilot)
+
+        ## Positioning Frame
+        "Innovation starts with a bet" - acknowledges the risk inherent in technical decisions, positions 42futures as the de-risking mechanism.
+
+        ## Success Metric
+        Quality of client's decision, not advocacy for specific solutions.
+    """
+}

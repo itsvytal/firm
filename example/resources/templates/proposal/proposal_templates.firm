@@ -1,0 +1,7 @@
+file_asset technical_retainer_proposal_template {
+    name = "Technical retainer proposal template"
+    path = path"./technical_retainer_proposal.typ"
+    owner_ref = person.daniel_rothmann
+
+    created_at = 2025-09-12 at 21:50 UTC+2
+}

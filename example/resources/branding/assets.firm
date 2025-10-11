@@ -1,0 +1,10 @@
+file_asset ftf_style_guide {
+    name = "42futures style guide"
+    path = path"./42futures_style_guide.pdf"
+    owner_ref = person.daniel_rothmann
+    source_ref = organization.main
+
+    notes = "A homegrown style guide detailing fonts, colors and shapes."
+
+    created_at = 2025-08-01 at 12:00 UTC+2
+}
