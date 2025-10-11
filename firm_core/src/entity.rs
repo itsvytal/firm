@@ -1,7 +1,7 @@
-use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
+use std::{collections::HashMap, fmt};
 
-use crate::{EntityId, FieldId, EntityType, FieldValue};
+use crate::{EntityId, EntityType, FieldId, FieldValue};
 
 /// Represents a business entity in the Firm graph.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -34,6 +34,18 @@ impl Entity {
     /// Try to get a entity field value for a given
     pub fn get_field(&self, id: &FieldId) -> Option<&FieldValue> {
         self.fields.get(id)
+    }
+}
+
+impl fmt::Display for Entity {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        writeln!(f, "ID: {}", self.id)?;
+        writeln!(f, "Fields:")?;
+        for (field_id, field_value) in &self.fields {
+            writeln!(f, "  - {}: {}", field_id, field_value)?;
+        }
+
+        Ok(())
     }
 }
 

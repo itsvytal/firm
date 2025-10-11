@@ -19,7 +19,7 @@ pub enum FieldType {
     Reference,
     List,
     DateTime,
-    Path
+    Path,
 }
 
 impl fmt::Display for FieldType {
@@ -33,7 +33,7 @@ impl fmt::Display for FieldType {
             FieldType::Reference => write!(f, "Reference"),
             FieldType::List => write!(f, "List"),
             FieldType::DateTime => write!(f, "DateTime"),
-            FieldType::Path => write!(f, "Path")
+            FieldType::Path => write!(f, "Path"),
         }
     }
 }
@@ -42,6 +42,15 @@ impl fmt::Display for FieldType {
 pub enum ReferenceValue {
     Entity(EntityId),
     Field(EntityId, FieldId),
+}
+
+impl fmt::Display for ReferenceValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            ReferenceValue::Entity(entity_id) => write!(f, "{}", entity_id),
+            ReferenceValue::Field(entity_id, field_id) => write!(f, "{}.{}", entity_id, field_id),
+        }
+    }
 }
 
 /// Holds the value of an entity field
@@ -55,7 +64,32 @@ pub enum FieldValue {
     Reference(ReferenceValue),
     List(Vec<FieldValue>),
     DateTime(DateTime<FixedOffset>),
-    Path(PathBuf)
+    Path(PathBuf),
+}
+
+impl fmt::Display for FieldValue {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            FieldValue::Boolean(val) => write!(f, "{}", val),
+            FieldValue::String(val) => write!(f, "{}", val),
+            FieldValue::Integer(val) => write!(f, "{}", val),
+            FieldValue::Float(val) => write!(f, "{}", val),
+            FieldValue::Currency { amount, currency } => write!(f, "{} {}", amount, currency),
+            FieldValue::Reference(val) => write!(f, "{}", val),
+            FieldValue::List(vals) => {
+                write!(
+                    f,
+                    "[{}]",
+                    vals.iter()
+                        .map(|v| v.to_string())
+                        .collect::<Vec<String>>()
+                        .join(",")
+                )
+            }
+            FieldValue::DateTime(val) => write!(f, "{}", val),
+            FieldValue::Path(val) => write!(f, "{}", val.display()),
+        }
+    }
 }
 
 impl FieldValue {
@@ -143,7 +177,7 @@ impl From<PathBuf> for FieldValue {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::env::{current_dir};
+    use std::env::current_dir;
 
     #[test]
     fn test_field_value_get_type() {
