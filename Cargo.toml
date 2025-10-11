@@ -1,4 +1,3 @@
 [workspace]
 members = ["firm_core", "firm_lang", "firm_cli"]
-default-members = ["firm_cli"]
 resolver = "3"

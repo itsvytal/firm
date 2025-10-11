@@ -368,35 +368,19 @@ checksum = "52051878f80a721bb68ebfbc930e07b65ba72f2da88968ea5c06fd6ca3d3a127"
 
 [[package]]
 name = "firm-cli"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "chrono",
  "clap",
  "console 0.16.1",
  "convert_case",
- "firm_core 0.1.0 (git+ssh://git@github.com/42futures/firm-core.git)",
- "firm_lang 0.1.0 (git+ssh://git@github.com/42futures/firm-lang.git)",
+ "firm_core 0.1.0",
+ "firm_lang 0.1.0",
  "indicatif",
  "indicatif-log-bridge",
  "inquire",
  "iso_currency",
  "log",
- "rust_decimal",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "firm_core"
-version = "0.1.0"
-dependencies = [
- "assert_matches",
- "chrono",
- "convert_case",
- "env_logger",
- "iso_currency",
- "log",
- "petgraph",
  "rust_decimal",
  "serde",
  "serde_json",
@@ -418,19 +402,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "firm_lang"
-version = "0.1.0"
+name = "firm_core"
+version = "0.2.0"
 dependencies = [
  "assert_matches",
  "chrono",
+ "convert_case",
  "env_logger",
- "firm_core 0.1.0 (git+ssh://git@github.com/42futures/firm-core.git)",
  "iso_currency",
  "log",
+ "petgraph",
  "rust_decimal",
- "tempfile",
- "tree-sitter",
- "tree-sitter-firm 0.1.0",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -439,12 +423,28 @@ version = "0.1.0"
 source = "git+ssh://git@github.com/42futures/firm-lang.git#985079f040c61061a2dcf57ce6be305cb3409bb8"
 dependencies = [
  "chrono",
- "firm_core 0.1.0 (git+ssh://git@github.com/42futures/firm-core.git)",
+ "firm_core 0.1.0",
  "iso_currency",
  "log",
  "rust_decimal",
  "tree-sitter",
  "tree-sitter-firm 0.1.0 (git+ssh://git@github.com/42futures/firm-lang.git)",
+]
+
+[[package]]
+name = "firm_lang"
+version = "0.2.0"
+dependencies = [
+ "assert_matches",
+ "chrono",
+ "env_logger",
+ "firm_core 0.1.0",
+ "iso_currency",
+ "log",
+ "rust_decimal",
+ "tempfile",
+ "tree-sitter",
+ "tree-sitter-firm 0.1.0",
 ]
 
 [[package]]
