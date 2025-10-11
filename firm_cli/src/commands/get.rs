@@ -90,7 +90,7 @@ pub fn get_related_entities(
     }
 }
 
-pub fn list_schemas(workspace_path: &PathBuf) -> Result<(), CliError> {
+pub fn list_schemas(workspace_path: &PathBuf, output_format: OutputFormat) -> Result<(), CliError> {
     ui::header("Listing schemas");
     let mut workspace = Workspace::new();
     load_workspace_files(&workspace_path, &mut workspace).map_err(|_| CliError::BuildError)?;
@@ -101,7 +101,10 @@ pub fn list_schemas(workspace_path: &PathBuf) -> Result<(), CliError> {
         build.schemas.len()
     ));
 
-    ui::json_output(&build.schemas);
+    match output_format {
+        OutputFormat::Pretty => ui::pretty_output_schema_list(&build.schemas.iter().collect()),
+        OutputFormat::Json => ui::json_output(&build.schemas),
+    }
     Ok(())
 }
 

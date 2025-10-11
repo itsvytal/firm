@@ -102,7 +102,7 @@ fn main() -> ExitCode {
         } => commands::get_entity_by_id(&workspace_path, entity_type, entity_id, cli.format),
         Commands::List { entity_type } => {
             if entity_type == "schema" {
-                commands::list_schemas(&workspace_path)
+                commands::list_schemas(&workspace_path, cli.format)
             } else {
                 commands::list_entities_by_type(&workspace_path, entity_type, cli.format)
             }

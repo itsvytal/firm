@@ -1,6 +1,6 @@
 use clap::ValueEnum;
 use console::Style;
-use firm_core::Entity;
+use firm_core::{Entity, EntitySchema};
 use indicatif::{ProgressBar, ProgressStyle};
 use std::{fmt, time::Duration};
 
@@ -126,6 +126,21 @@ pub fn pretty_output_entity_list(entities: &Vec<&Entity>) {
 
         // Add a separator after each entity, except for the last one.
         if i < entities.len() - 1 {
+            println!("---------------------------------------");
+        }
+    }
+}
+
+pub fn pretty_output_schema_single(schema: &EntitySchema) {
+    println!("\n{}", schema);
+}
+
+pub fn pretty_output_schema_list(schemas: &Vec<&EntitySchema>) {
+    for (i, schema) in schemas.iter().enumerate() {
+        pretty_output_schema_single(schema);
+
+        // Add a separator after each entity, except for the last one.
+        if i < schemas.len() - 1 {
             println!("---------------------------------------");
         }
     }
