@@ -4,11 +4,12 @@ version = "0.2.0"
 edition = "2024"
 description = "Interact with Firm from the command line."
 license = "AGPL-3.0"
-repository = "https://github.com/42futures/firm-cli"
+repository = "https://github.com/42futures/firm"
 
 [dependencies]
-firm_core = { git = "ssh://git@github.com/42futures/firm-core.git" }
-firm_lang = { git = "ssh://git@github.com/42futures/firm-lang.git" }
+firm_core = { path = "../firm_core" }
+firm_lang = { path = "../firm_lang" }
+
 clap = { version = "4.5.42", features = ["derive"] }
 console = "0.16.0"
 indicatif = "0.18.0"

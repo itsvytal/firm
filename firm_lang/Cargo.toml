@@ -2,17 +2,16 @@
 name = "firm_lang"
 version = "0.2.0"
 edition = "2024"
-description = "DSL parsing and generation for Firm business entities."
+description = "Parse and generate DSL for Firm workspaces."
 license = "AGPL-3.0"
-repository = "https://github.com/42futures/firm-lang"
+repository = "https://github.com/42futures/firm"
 
 [dependencies]
-firm_core = { git = "ssh://git@github.com/42futures/firm-core.git" }
+firm_core = { path = "../firm_core" }
 tree-sitter = "0.25.8"
 tree-sitter-firm = { path = "../tree-sitter-firm" }
-log = "0.4.27"
 
-# These should be compatible with firm-core
+log = "0.4.27"
 rust_decimal = { version = "1.37", features = ["serde-with-str"] }
 iso_currency = { version = "0.5", features = ["with-serde"] }
 chrono = { version = "0.4", features = ["serde"] }

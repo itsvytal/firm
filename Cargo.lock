@@ -374,8 +374,8 @@ dependencies = [
  "clap",
  "console 0.16.1",
  "convert_case",
- "firm_core 0.1.0",
- "firm_lang 0.1.0",
+ "firm_core",
+ "firm_lang",
  "indicatif",
  "indicatif-log-bridge",
  "inquire",
@@ -388,21 +388,6 @@ dependencies = [
 
 [[package]]
 name = "firm_core"
-version = "0.1.0"
-source = "git+ssh://git@github.com/42futures/firm-core.git#4f7e42b366aab841202a71eca0e82e4ddfe97687"
-dependencies = [
- "chrono",
- "convert_case",
- "iso_currency",
- "log",
- "petgraph",
- "rust_decimal",
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "firm_core"
 version = "0.2.0"
 dependencies = [
  "assert_matches",
@@ -419,32 +404,18 @@ dependencies = [
 
 [[package]]
 name = "firm_lang"
-version = "0.1.0"
-source = "git+ssh://git@github.com/42futures/firm-lang.git#985079f040c61061a2dcf57ce6be305cb3409bb8"
-dependencies = [
- "chrono",
- "firm_core 0.1.0",
- "iso_currency",
- "log",
- "rust_decimal",
- "tree-sitter",
- "tree-sitter-firm 0.1.0 (git+ssh://git@github.com/42futures/firm-lang.git)",
-]
-
-[[package]]
-name = "firm_lang"
 version = "0.2.0"
 dependencies = [
  "assert_matches",
  "chrono",
  "env_logger",
- "firm_core 0.1.0",
+ "firm_core",
  "iso_currency",
  "log",
  "rust_decimal",
  "tempfile",
  "tree-sitter",
- "tree-sitter-firm 0.1.0",
+ "tree-sitter-firm",
 ]
 
 [[package]]
@@ -1164,15 +1135,6 @@ version = "0.1.0"
 dependencies = [
  "cc",
  "tree-sitter",
- "tree-sitter-language",
-]
-
-[[package]]
-name = "tree-sitter-firm"
-version = "0.1.0"
-source = "git+ssh://git@github.com/42futures/firm-lang.git#985079f040c61061a2dcf57ce6be305cb3409bb8"
-dependencies = [
- "cc",
  "tree-sitter-language",
 ]
 
