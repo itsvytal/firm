@@ -5,10 +5,10 @@ Firm lets you define your business entities (people, organizations, projects, ta
 
 ## Features
 - **Map your business:** Strategy to execution in version-controlled plain text.
-- **Work management:** Track your work in the command line.
+- **Work management:** Project and task tracking in the command line.
 - **Local-first:** Everything important in one place (that you own).
-- **Rich relationships:** Create links between strategy, customers, projects, and tasks.
-- **Automatable:** Bidirectional DSL and queryable graph to automate workflows.
+- **Rich relationships:** Link strategies, customers, projects, and tasks.
+- **Automatable:** Hook into the workspace using the Firm CLI or Rust package.
 
 ## Getting started
 Firm operates on a "workspace", which is a directory containing all your `.firm` DSL files. The Firm CLI processes every file in this workspace to build a unified, queryable graph of your business.
@@ -228,6 +228,7 @@ Fields are typed key-value pairs attached to an entity. Firm supports a rich set
 - `DateTime`
 - `List` of other values
 - `Reference` to other fields or entities
+- `Path` to a local file
 
 **In the DSL**, the syntax maps directly to these types:
 
@@ -240,6 +241,7 @@ my_task design_homepage {
     due_date = 2024-12-01 at 17:00 UTC   // DateTime
     tags = ["ui", "ux"]                  // List
     assignee = person.jane_doe           // Reference
+    deliverable = path"homepage.zip"     // Path
 }
 ```
 
