@@ -24,13 +24,13 @@ impl<'a> ParsedField<'a> {
         Self { node, source }
     }
 
-    /// Returns the field name (e.g., "name", "age").
+    /// Gets the field name (e.g., "name", "age").
     pub fn id(&self) -> Option<&str> {
         let id_node = find_child_of_kind(&self.node, FIELD_ID_KIND)?;
         Some(get_node_text(&id_node, self.source))
     }
 
-    /// Parses and returns the field's value with full type information.
+    /// Parses and gets the field's value with full type information.
     pub fn value(&self) -> Result<ParsedValue, ValueParseError> {
         let value_node =
             find_child_of_kind(&self.node, VALUE_KIND).ok_or(ValueParseError::MissingValue)?;

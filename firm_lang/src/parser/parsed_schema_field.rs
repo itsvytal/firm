@@ -29,7 +29,7 @@ impl<'a> ParsedSchemaField<'a> {
         Self { node, source }
     }
 
-    /// Returns the field name from the "name" field.
+    /// Gets the field name from the "name" field.
     pub fn name(&self) -> Result<String, ValueParseError> {
         let name_field = self
             .find_field_by_name("name")
@@ -41,7 +41,7 @@ impl<'a> ParsedSchemaField<'a> {
         }
     }
 
-    /// Returns the field type from the "type" field.
+    /// Gets the field type from the "type" field.
     pub fn field_type(&self) -> Result<String, ValueParseError> {
         let type_field = self
             .find_field_by_name("type")
@@ -53,7 +53,7 @@ impl<'a> ParsedSchemaField<'a> {
         }
     }
 
-    /// Returns whether the field is required from the "required" field.
+    /// Checks whether the field is required or not.
     /// Defaults to false if not specified.
     pub fn required(&self) -> bool {
         if let Some(required_field) = self.find_field_by_name("required") {
@@ -61,6 +61,7 @@ impl<'a> ParsedSchemaField<'a> {
                 return b;
             }
         }
+
         false // Default to false if not specified or invalid
     }
 

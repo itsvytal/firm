@@ -1,7 +1,7 @@
-use std::path::PathBuf;
 use chrono::{DateTime, FixedOffset, Local, NaiveDate, NaiveTime, Offset, TimeZone};
 use iso_currency::Currency;
 use rust_decimal::Decimal;
+use std::path::PathBuf;
 use tree_sitter::Node;
 
 use super::{parser_errors::ValueParseError, parser_utils::get_node_text};
@@ -40,10 +40,10 @@ impl From<&str> for ValueKind {
     }
 }
 
-/// A strongly-typed value parsed from Firm DSL source.
+/// A typed value parsed from Firm DSL source.
 ///
-/// Supports all Firm value types including primitives, structured types,
-/// and temporal types with full type safety and validation.
+/// Supports Firm value types including primitives, structured,
+/// and temporal types with type safety and validation.
 #[derive(Debug, Clone, PartialEq)]
 pub enum ParsedValue {
     /// Boolean value (`true` or `false`)
@@ -88,11 +88,11 @@ impl ParsedValue {
             ParsedValue::FieldReference { .. } => "FieldReference",
             ParsedValue::List(_) => "List",
             ParsedValue::DateTime(_) => "DateTime",
-            ParsedValue::Path(_) => "Path"
+            ParsedValue::Path(_) => "Path",
         }
     }
 
-    /// Parses a value from a tree-sitter node with full type conversion.
+    /// Parses a value from a tree-sitter node with type conversion.
     pub fn from_node<'a>(node: Node<'a>, source: &'a str) -> Result<ParsedValue, ValueParseError> {
         let kind = Self::get_value_kind(node).ok_or(ValueParseError::UnknownValueKind)?;
         let raw = get_node_text(&node, source);
@@ -308,6 +308,13 @@ impl ParsedValue {
         }
     }
 
+    /// Parses boolean values (`true` or `false`).
+    fn parse_path(raw: &str) -> Result<ParsedValue, ValueParseError> {
+        let raw_path = raw.replace("path\"", "").trim_matches('"').to_string();
+        let path = PathBuf::from(raw_path);
+        Ok(ParsedValue::Path(path))
+    }
+
     /// Removes common leading whitespace from multi-line strings.
     fn trim_common_indentation(s: &str) -> String {
         let lines: Vec<&str> = s.lines().collect();
@@ -349,12 +356,5 @@ impl ParsedValue {
 
         FixedOffset::east_opt(hours * 3600)
             .ok_or_else(|| ValueParseError::InvalidTimezone(offset_str.to_string()))
-    }
-
-    /// Parses boolean values (`true` or `false`).
-    fn parse_path(raw: &str) -> Result<ParsedValue, ValueParseError> {
-        let raw_path = raw.replace("path\"", "").trim_matches('"').to_string();
-        let path = PathBuf::from(raw_path);
-        Ok(ParsedValue::Path(path))
     }
 }

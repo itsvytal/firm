@@ -3,7 +3,7 @@ use tree_sitter::{Language, Parser};
 use super::LanguageError;
 use super::ParsedSource;
 
-/// Returns the tree-sitter language for Firm DSL.
+/// Gets the tree-sitter language for Firm DSL.
 fn language() -> Language {
     tree_sitter_firm::LANGUAGE.into()
 }
@@ -11,7 +11,7 @@ fn language() -> Language {
 /// Parses Firm DSL source code into a structured representation.
 ///
 /// This is the main entry point for parsing Firm DSL. It initializes
-/// a tree-sitter parser and returns a ParsedSource for further processing.
+/// a tree-sitter parser and returns ParsedSource for further processing.
 pub fn parse_source(source: String) -> Result<ParsedSource, LanguageError> {
     let mut parser = Parser::new();
     parser

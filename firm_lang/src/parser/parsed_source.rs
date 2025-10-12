@@ -21,7 +21,7 @@ impl ParsedSource {
         Self { source, tree }
     }
 
-    /// Returns true if the source contains syntax errors.
+    /// Check if the source contains syntax errors.
     pub fn has_error(&self) -> bool {
         self.tree.root_node().has_error()
     }

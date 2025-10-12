@@ -24,7 +24,7 @@ impl<'a> ParsedSchema<'a> {
         Self { node, source }
     }
 
-    /// Returns the schema name (e.g., "project", "invoice").
+    /// Gets the schema name (e.g., "project", "invoice").
     pub fn name(&self) -> Option<&str> {
         let name_node = find_child_of_kind(&self.node, SCHEMA_NAME_KIND)?;
         Some(get_node_text(&name_node, self.source))
