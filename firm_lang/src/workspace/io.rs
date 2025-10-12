@@ -7,7 +7,7 @@ use super::{Workspace, WorkspaceError};
 const FIRM_FILE_EXTENSION: &str = "firm";
 
 impl Workspace {
-    /// Load a single firm source file
+    /// Load a single firm source file.
     pub fn load_file(&mut self, path: &PathBuf) -> Result<(), WorkspaceError> {
         let text = fs::read_to_string(path).map_err(|err| WorkspaceError::IoError(err))?;
         let parsed = parse_source(text.clone())
@@ -17,11 +17,12 @@ impl Workspace {
         Ok(())
     }
 
-    /// Loads all firm files in a directory and its subdirectories
+    /// Loads all firm files in a directory and its subdirectories.
     pub fn load_directory(&mut self, directory_path: &PathBuf) -> Result<(), WorkspaceError> {
         self.load_directory_recursive(directory_path)
     }
 
+    /// Load all firm files in a directory recursively.
     fn load_directory_recursive(&mut self, directory_path: &PathBuf) -> Result<(), WorkspaceError> {
         let entries = fs::read_dir(directory_path).map_err(|e| WorkspaceError::IoError(e))?;
 

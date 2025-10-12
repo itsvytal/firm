@@ -3,6 +3,7 @@ use std::collections::HashMap;
 
 use super::{Workspace, WorkspaceError};
 
+/// Holds converted entities and schemas after the workspace is built.
 #[derive(Debug)]
 pub struct WorkspaceBuild {
     pub entities: Vec<Entity>,
@@ -24,12 +25,6 @@ impl Workspace {
     }
 
     /// Build the workspace with progress reporting.
-    ///
-    /// # Arguments
-    /// * `progress` - Callback function called during build process
-    ///   - `total`: Total number of files
-    ///   - `current`: Current number of files processed
-    ///   - `phase`: Description of current phase ("Loading schemas", "Building entities", etc.)
     pub fn build_with_progress<F>(
         &mut self,
         mut progress: F,
@@ -48,7 +43,7 @@ impl Workspace {
         let mut files_processed = 0;
         progress(files_to_process, files_processed, "Building schemas");
 
-        // First pass: Add custom schemas from all files
+        // First pass: Walk through workspace files to add custom schemas
         for (path, file) in &self.files {
             let parsed_schemas = file.parsed.schemas();
             for parsed_schema in &parsed_schemas {
@@ -66,7 +61,7 @@ impl Workspace {
             }
         }
 
-        // Second pass: Build and validate entities file by file
+        // Second pass: Walk through workspace files to build and validate entities against schemas
         let mut entities = Vec::new();
 
         files_processed = 0;

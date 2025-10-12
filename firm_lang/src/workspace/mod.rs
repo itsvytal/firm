@@ -9,6 +9,10 @@ pub use workspace_errors::WorkspaceError;
 
 use crate::parser::ParsedSource;
 
+/// Represents a collection of files to be processed by Firm.
+///
+/// Initally, we collect DSL files in the workspace, parsing the source.
+/// Afterwards, the workspace can be "built", converting that to core entities and schemas.
 #[derive(Debug)]
 pub struct Workspace {
     files: HashMap<PathBuf, WorkspaceFile>,
@@ -21,11 +25,13 @@ impl Workspace {
         }
     }
 
+    /// Gets the number of files currently in the workspace.
     pub fn num_files(&self) -> usize {
         self.files.len()
     }
 }
 
+/// Represents a parsed file in the workspace.
 #[derive(Debug)]
 pub struct WorkspaceFile {
     parsed: ParsedSource,

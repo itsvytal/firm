@@ -1,5 +1,6 @@
 use std::{fmt, io, path::PathBuf};
 
+/// Defines the errors you might encounter using a workspace.
 #[derive(Debug)]
 pub enum WorkspaceError {
     IoError(io::Error),
