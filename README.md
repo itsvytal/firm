@@ -20,11 +20,16 @@ Use `firm add` to interactively generate new entities. Out of the box, Firm supp
 
 ```bash
 $ firm add
-...
+```
+```
 Adding new entity
+
 > Type: organization
 > ID: megacorp
 > Name: Megacorp Ltd.
+> Email: mega@corp.com
+> Urls: ["corp.com"]
+
 Writing generated DSL to file my_workspace/generated/organization.firm
 ```
 
@@ -34,41 +39,31 @@ Alternatively, you can create a `.firm` file and write the DSL yourself. This gi
 ```firm
 organization megacorp {
   name = "Megacorp Ltd."
+  email = "mega@corp.com"
+  urls = ["corp.com"]
 }
 ```
 
 Both of these methods achieve the same result: a new entity defined in your Firm workspace.
 
 ### Querying the workspace
-Once you have entities in your workspace, you can query them using the CLI. By default, Firm outputs entities as JSON, allowing for downstream automations.
+Once you have entities in your workspace, you can query them using the CLI. By default, Firm will "pretty" output entities but can also be configured for JSON, allowing for downstream automations.
 
 #### Listing entities
 Use `firm list` to see all entities of a specific type.
 
 ```bash
 $ firm list task
-...
+```
+```
 Found 7 entities with type 'task'
-[
-  {
-    "id": "task.design_homepage",
-    "entity_type": "task",
-    "fields": {
-      "name": {
-        "String": "Design new homepage"
-      },
-      "status": {
-        "String": "in-progress"
-      },
-      "assignee_ref": {
-        "Reference": {
-          "Entity": "person.jane_doe"
-        }
-      }
-    }
-  },
-  ...
-]
+
+ID: task.design_homepage
+Name: Design new homepage
+Is completed: false
+Assignee ref: person.jane_doe
+
+...
 ```
 
 #### Getting an entity
@@ -76,20 +71,13 @@ To view the full details of a single entity, use `firm get` followed by the enti
 
 ```bash
 $ firm get person john_doe
-...
+```
+```
 Found 'person' entity with ID 'john_doe'
-{
-  "id": "person.john_doe",
-  "entity_type": "person",
-  "fields": {
-    "name": {
-      "String": "John Doe"
-    },
-    "email": {
-      "String": "john@doe.com"
-    }
-  }
-}
+
+ID: person.john_doe
+Name: John Doe
+Email: john@doe.com
 ```
 
 #### Exploring relationships
@@ -97,39 +85,20 @@ The power of Firm lies in its ability to build a graph of your business. Use `fi
 
 ```bash
 $ firm related contact john_doe
-...
+```
+```
 Found 1 relationships for 'contact' entity with ID 'john_doe'
-[
-  {
-    "id": "interaction.20240521_megacorp_intro",
-    "entity_type": "interaction",
-    "fields": {
-      "type": {
-        "String": "Introductory Call"
-      },
-      "subject": {
-        "String": "Initial discussion about Project X"
-      },
-      "interaction_date": {
-        "DateTime": "2024-05-21T14:00:00Z"
-      },
-      "initiator_ref": {
-        "Reference": {
-          "Entity": "person.jane_smith"
-        }
-      },
-      "primary_contact_ref": {
-        "Reference": {
-          "Entity": "person.john_doe"
-        }
-      }
-    }
-  }
-]
+
+ID: interaction.megacorp_intro
+Type: Call
+Subject: Initial discussion about Project X
+Interaction date: 2025-09-30 09:45:00 +02:00
+Initiator ref: person.jane_smith
+Primary contact ref: contact.john_doe
 ```
 
 #### What's next
-So far, you've seen the basic commands for interacting with a Firm workspace. The project is a work-in-progress, and you can expect to see more sophisticated features added over time, including a more powerful query engine and tools for running business workflows directly from the CLI.
+You've seen the basic commands for interacting with a Firm workspace. The project is a work-in-progress, and you can expect to see more sophisticated features added over time, including a more powerful query engine and tools for running business workflows directly from the CLI.
 
 ## Using Firm as a library
 Beyond the CLI, you can integrate Firm's core logic directly into your own software using the `firm_core` and `firm_lang` Rust packages. This allows you to build custom tools, automations, and integrations on top of Firm.
