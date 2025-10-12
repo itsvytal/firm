@@ -1,11 +1,11 @@
-use std::path::PathBuf;
 use chrono::{DateTime, FixedOffset};
+use std::path::PathBuf;
 
 use firm_core::{FieldValue, ReferenceValue};
 
 use super::GeneratorOptions;
 
-/// Generate DSL representation of a field value
+/// Generate DSL for en entity field value.
 pub fn generate_value(value: &FieldValue, options: &GeneratorOptions) -> String {
     match value {
         FieldValue::Boolean(b) => b.to_string(),
@@ -22,7 +22,7 @@ pub fn generate_value(value: &FieldValue, options: &GeneratorOptions) -> String 
     }
 }
 
-/// Generate string value with proper quoting
+/// Generate string value with proper quoting.
 fn generate_string(s: &str, options: &GeneratorOptions) -> String {
     if s.contains('\n') {
         // Multi-line string
@@ -41,7 +41,7 @@ fn generate_string(s: &str, options: &GeneratorOptions) -> String {
     }
 }
 
-/// Generate float value ensuring it always has a decimal place
+/// Generate float value, ensuring it always has a decimal place.
 fn generate_float(f: &f64) -> String {
     let formatted = f.to_string();
 
@@ -53,7 +53,7 @@ fn generate_float(f: &f64) -> String {
     }
 }
 
-/// Generate reference value
+/// Generate entity/field reference value.
 fn generate_reference(reference: &ReferenceValue) -> String {
     match reference {
         ReferenceValue::Entity(entity_id) => entity_id.0.clone(),
@@ -63,7 +63,7 @@ fn generate_reference(reference: &ReferenceValue) -> String {
     }
 }
 
-/// Generate list value
+/// Generate list value.
 fn generate_list(values: &[FieldValue], options: &GeneratorOptions) -> String {
     if values.is_empty() {
         return "[]".to_string();
@@ -74,7 +74,7 @@ fn generate_list(values: &[FieldValue], options: &GeneratorOptions) -> String {
     format!("[{}]", value_strings.join(", "))
 }
 
-/// Generate datetime value
+/// Generate datetime value.
 fn generate_datetime(dt: &DateTime<FixedOffset>) -> String {
     let date_str = dt.format("%Y-%m-%d").to_string();
     let time_str = dt.format("%H:%M").to_string();
@@ -95,7 +95,7 @@ fn generate_datetime(dt: &DateTime<FixedOffset>) -> String {
     format!("{} at {} {}", date_str, time_str, timezone_str)
 }
 
-/// Generate path value
+/// Generate path value.
 fn generate_path(path: &PathBuf) -> String {
     format!("path\"{}\"", path.display())
 }

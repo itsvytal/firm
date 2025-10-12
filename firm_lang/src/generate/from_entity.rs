@@ -2,14 +2,12 @@ use firm_core::{Entity, decompose_entity_id};
 
 use super::{GeneratorOptions, from_field, generator_options::FieldOrder};
 
-/// Generate DSL for an entity
+/// Generate DSL for a single entity.
 pub fn generate_entity(entity: &Entity, options: &GeneratorOptions) -> String {
     let mut output = String::new();
-
-    // Decompose entity ID
     let (_, entity_id) = decompose_entity_id(&entity.id.0);
 
-    // Entity declaration
+    // Entity declaration and open block
     output.push_str(&format!(
         "{} {} {{\n",
         entity.entity_type.to_string().to_lowercase(),
@@ -28,7 +26,7 @@ pub fn generate_entity(entity: &Entity, options: &GeneratorOptions) -> String {
     output
 }
 
-/// Generate all fields for an entity
+/// Generate DSL for all fields for an entity.
 fn generate_entity_fields(entity: &Entity, options: &GeneratorOptions) -> Vec<String> {
     let mut fields: Vec<(String, &firm_core::FieldValue)> = entity
         .fields
@@ -49,7 +47,7 @@ fn generate_entity_fields(entity: &Entity, options: &GeneratorOptions) -> Vec<St
         .collect()
 }
 
-/// Apply the specified field ordering strategy
+/// Apply the specified field ordering strategy.
 fn apply_field_ordering(fields: &mut Vec<(String, &firm_core::FieldValue)>, order: &FieldOrder) {
     match order {
         FieldOrder::Unordered => {}

@@ -8,11 +8,12 @@ use firm_core::Entity;
 use from_entity::generate_entity;
 use generator_options::GeneratorOptions;
 
-/// Generate DSL for a collection of entities
+/// Generates Firm DSL for a collection of entities.
 pub fn generate_dsl(entities: &[Entity]) -> String {
     generate_dsl_with_options(entities, &GeneratorOptions::default())
 }
 
+/// Generates DSL with formatting options.
 pub fn generate_dsl_with_options(entities: &[Entity], options: &GeneratorOptions) -> String {
     let mut output = String::new();
 

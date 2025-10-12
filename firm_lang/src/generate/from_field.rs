@@ -2,7 +2,7 @@ use firm_core::FieldValue;
 
 use super::{GeneratorOptions, from_value};
 
-/// Generate DSL for a field assignment
+/// Generate DSL for an entity field.
 pub fn generate_field(
     field_name: &str,
     field_value: &FieldValue,

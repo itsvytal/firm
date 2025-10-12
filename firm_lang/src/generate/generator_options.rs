@@ -1,4 +1,4 @@
-/// Options for controlling DSL generation formatting
+/// Formatting options when generating Firm DSL.
 #[derive(Debug, Clone)]
 pub struct GeneratorOptions {
     pub indent_style: IndentStyle,
@@ -16,12 +16,14 @@ impl Default for GeneratorOptions {
     }
 }
 
+/// Which kinds of indents to use when generating DSL.
 #[derive(Debug, Clone)]
 pub enum IndentStyle {
     Spaces(usize),
     Tabs,
 }
 
+/// How to order entity fields.
 #[derive(Debug, Clone)]
 pub enum FieldOrder {
     Unordered,
