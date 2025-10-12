@@ -118,7 +118,7 @@ fn main() -> ExitCode {
             direction,
             cli.format,
         ),
-        Commands::Add { to_file } => commands::add_entity(&workspace_path, to_file),
+        Commands::Add { to_file } => commands::add_entity(&workspace_path, to_file, cli.format),
     };
 
     result.map_or(ExitCode::FAILURE, |_| ExitCode::SUCCESS)

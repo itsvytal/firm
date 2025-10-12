@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use convert_case::{Case, Casing};
-use firm_core::{Entity, make_composite_entity_id};
+use firm_core::{Entity, EntitySchema, make_composite_entity_id};
 use firm_lang::generate::generate_dsl;
 use firm_lang::workspace::Workspace;
 use inquire::{Confirm, Select, Text};
@@ -13,12 +13,24 @@ use super::{
     build_graph, build_workspace, field_prompt::prompt_for_field_value, load_workspace_files,
 };
 use crate::errors::CliError;
-use crate::ui::{self};
+use crate::ui::{self, OutputFormat};
 
 pub const GENERATED_DIR_NAME: &str = "generated";
 pub const FIRM_EXTENSION: &str = "firm";
 
-pub fn add_entity(workspace_path: &PathBuf, to_file: Option<PathBuf>) -> Result<(), CliError> {
+// Wrapper for EntitySchema that customizes Display for Inquire
+struct InquireSchema<'a>(&'a EntitySchema);
+impl<'a> std::fmt::Display for InquireSchema<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.entity_type)
+    }
+}
+
+pub fn add_entity(
+    workspace_path: &PathBuf,
+    to_file: Option<PathBuf>,
+    output_format: OutputFormat,
+) -> Result<(), CliError> {
     ui::header("Adding new entity");
     let mut workspace = Workspace::new();
     load_workspace_files(&workspace_path, &mut workspace).map_err(|_| CliError::BuildError)?;
@@ -27,10 +39,12 @@ pub fn add_entity(workspace_path: &PathBuf, to_file: Option<PathBuf>) -> Result<
 
     let mut sorted_schemas = build.schemas.clone();
     sorted_schemas.sort_by_key(|schema| schema.entity_type.to_string());
-    let chosen_schema = Select::new("Type:", sorted_schemas)
+    let schema_options: Vec<_> = sorted_schemas.iter().map(InquireSchema).collect();
+    let chosen_option = Select::new("Type:", schema_options)
         .prompt()
         .map_err(|_| CliError::InputError)?;
 
+    let chosen_schema = chosen_option.0.clone();
     let chosen_type_str = format!("{}", &chosen_schema.entity_type);
     let mut chosen_id = Text::new("ID:")
         .prompt()
@@ -107,7 +121,7 @@ pub fn add_entity(workspace_path: &PathBuf, to_file: Option<PathBuf>) -> Result<
         }
     }
 
-    let generated_dsl = generate_dsl(&[entity]);
+    let generated_dsl = generate_dsl(&[entity.clone()]);
 
     // Use target file if provided, otherwise create a sensible default path
     let generated_file_path = match to_file {
@@ -136,7 +150,15 @@ pub fn add_entity(workspace_path: &PathBuf, to_file: Option<PathBuf>) -> Result<
         .open(generated_file_path)
     {
         Ok(mut file) => match file.write_all(&generated_dsl.into_bytes()) {
-            Ok(_) => Ok(()),
+            Ok(_) => {
+                ui::success(&format!("Generated DSL for '{}'", &entity.id));
+
+                match output_format {
+                    OutputFormat::Pretty => ui::pretty_output_entity_single(&entity),
+                    OutputFormat::Json => ui::json_output(&entity),
+                }
+                Ok(())
+            }
             Err(e) => {
                 ui::error_with_details("Couldn't write to file", &e.to_string());
                 Err(CliError::FileError)
