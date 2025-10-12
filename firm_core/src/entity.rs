@@ -22,17 +22,16 @@ impl Entity {
         }
     }
 
-    /// Builder method to add a field to an entity.
+    /// Builder method to add a field to a new entity.
     pub fn with_field<V>(mut self, id: FieldId, value: V) -> Self
     where
         V: Into<FieldValue>,
     {
         self.fields.insert(id, value.into());
-
         self
     }
 
-    /// Try to get a entity field value for a given
+    /// Try to get a entity field value for a given field ID.
     pub fn get_field(&self, id: &FieldId) -> Option<&FieldValue> {
         self.fields.get(id)
     }
