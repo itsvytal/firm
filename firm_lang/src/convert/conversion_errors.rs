@@ -1,6 +1,6 @@
 use std::fmt;
 
-/// Represents a problem while converting a ParsedEntity.
+/// Errors that can occur when converting a parsed entity.
 #[derive(Debug)]
 pub enum EntityConversionError {
     MissingEntityType,
@@ -28,7 +28,7 @@ impl fmt::Display for EntityConversionError {
     }
 }
 
-/// Represents a problem converting a ParsedSchema.
+/// Errors that can occur when converting a parsed schema.
 #[derive(Debug)]
 pub enum SchemaConversionError {
     MissingSchemaName,

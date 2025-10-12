@@ -1,6 +1,5 @@
 use firm_core::{
-    FieldId,
-    EntityType,
+    EntityType, FieldId,
     field::FieldType,
     schema::{EntitySchema, FieldSchema},
 };
@@ -44,7 +43,7 @@ impl TryFrom<&ParsedSchema<'_>> for EntitySchema {
     }
 }
 
-/// Converts a field type string to a FieldType enum
+/// Converts a field type string to a FieldType enum.
 fn convert_field_type(type_str: &str) -> Result<FieldType, SchemaConversionError> {
     match type_str {
         "boolean" => Ok(FieldType::Boolean),
