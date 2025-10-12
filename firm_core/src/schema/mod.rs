@@ -1,8 +1,3 @@
-//! Schema definitions for entities and their fields.
-//!
-//! This module provides types and utilities for defining entity schemas,
-//! including field types, constraints, and validation rules.
-
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt::Display};
 
@@ -23,7 +18,7 @@ pub enum FieldSchema {
 }
 
 impl FieldSchema {
-    /// Get the expected field type
+    /// Get the expected field type.
     pub fn expected_type(&self) -> &FieldType {
         match self {
             FieldSchema::Required(field_type) => field_type,
@@ -31,7 +26,7 @@ impl FieldSchema {
         }
     }
 
-    /// Check if the field is required
+    /// Check if the field is required.
     pub fn is_required(&self) -> bool {
         matches!(self, FieldSchema::Required(_))
     }
@@ -56,7 +51,6 @@ impl EntitySchema {
     /// Builder method to add a field to the schema.
     pub fn add_field_schema(mut self, id: FieldId, field_schema: FieldSchema) -> Self {
         self.fields.insert(id, field_schema);
-
         self
     }
 
@@ -70,7 +64,7 @@ impl EntitySchema {
         self.add_field_schema(id, FieldSchema::Optional(field_type))
     }
 
-    /// Builder method to add an metadata fields to the schema.
+    /// Builder method to add common metadata fields to the schema.
     pub fn with_metadata(self) -> Self {
         self.with_optional_field(FieldId::new("created_at"), FieldType::DateTime)
             .with_optional_field(FieldId::new("updated_at"), FieldType::DateTime)

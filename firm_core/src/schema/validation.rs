@@ -7,11 +7,6 @@ pub type ValidationResult = Result<(), Vec<ValidationError>>;
 
 impl EntitySchema {
     /// Validates an entity against the schema.
-    ///
-    /// # Returns
-    ///
-    /// `Ok(())` if the entity is valid, or `Err(Vec<ValidationError>)`
-    /// containing all validation errors found.
     pub fn validate(&self, entity: &Entity) -> ValidationResult {
         debug!(
             "Validating entity: '{}' for schema: '{}'",
@@ -71,8 +66,7 @@ mod tests {
     use super::*;
     use crate::schema::ValidationErrorType;
     use crate::{
-        EntityId, FieldId,
-        EntityType,
+        EntityId, EntityType, FieldId,
         field::{FieldType, FieldValue},
     };
     use assert_matches::assert_matches;
@@ -83,10 +77,11 @@ mod tests {
             .with_required_field(FieldId::new("name"), FieldType::String)
             .with_optional_field(FieldId::new("email"), FieldType::String);
 
-        let entity = Entity::new(EntityId::new("test_person"), EntityType::new("person")).with_field(
-            FieldId::new("name"),
-            FieldValue::String(String::from("John Doe")),
-        );
+        let entity = Entity::new(EntityId::new("test_person"), EntityType::new("person"))
+            .with_field(
+                FieldId::new("name"),
+                FieldValue::String(String::from("John Doe")),
+            );
 
         let result = schema.validate(&entity);
 
@@ -96,10 +91,7 @@ mod tests {
     #[test]
     fn test_validate_error_mismatched_entity_types() {
         let schema = EntitySchema::new(EntityType::new("test_a"));
-        let entity = Entity::new(
-            EntityId::new("test"),
-            EntityType::new("test_b"),
-        );
+        let entity = Entity::new(EntityId::new("test"), EntityType::new("test_b"));
 
         let result = schema.validate(&entity);
 
@@ -120,10 +112,11 @@ mod tests {
             .with_required_field(FieldId::new("name"), FieldType::String)
             .with_required_field(FieldId::new("email"), FieldType::String);
 
-        let entity = Entity::new(EntityId::new("test_person"), EntityType::new("person")).with_field(
-            FieldId::new("name"),
-            FieldValue::String(String::from("John Doe")),
-        );
+        let entity = Entity::new(EntityId::new("test_person"), EntityType::new("person"))
+            .with_field(
+                FieldId::new("name"),
+                FieldValue::String(String::from("John Doe")),
+            );
 
         let result = schema.validate(&entity);
 
@@ -143,10 +136,11 @@ mod tests {
         let schema = EntitySchema::new(EntityType::new("person"))
             .with_required_field(FieldId::new("is_nice"), FieldType::Boolean);
 
-        let entity = Entity::new(EntityId::new("test_person"), EntityType::new("person")).with_field(
-            FieldId::new("is_nice"),
-            FieldValue::String("Sure".to_string()),
-        );
+        let entity = Entity::new(EntityId::new("test_person"), EntityType::new("person"))
+            .with_field(
+                FieldId::new("is_nice"),
+                FieldValue::String("Sure".to_string()),
+            );
 
         let result = schema.validate(&entity);
 

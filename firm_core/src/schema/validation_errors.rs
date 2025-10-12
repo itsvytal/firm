@@ -1,23 +1,23 @@
 use crate::{EntityId, EntityType, FieldId, FieldType};
 
-/// Defines the types of errors you might encounter when validating a schema
+/// Defines the types of errors you might encounter when validating a schema.
 #[derive(Debug, Clone, PartialEq)]
 pub enum ValidationErrorType {
-    /// The entity type did not match the schema
+    /// The entity type did not match the schema.
     MismatchedEntityType {
         expected: EntityType,
         actual: EntityType,
     },
-    /// The entity is missing a required field
+    /// The entity is missing a required field.
     MissingRequiredField { required: FieldId },
-    /// The entity has a field whose type did not match the schema
+    /// The entity has a field whose type did not match the schema.
     MismatchedFieldType {
         expected: FieldType,
         actual: FieldType,
     },
 }
 
-/// Information about an error encountered while validating a schema
+/// Information about an error encountered while validating a schema.
 #[derive(Debug, Clone, PartialEq)]
 pub struct ValidationError {
     pub entity_id: Option<EntityId>,
@@ -27,7 +27,7 @@ pub struct ValidationError {
 }
 
 impl ValidationError {
-    /// Shorthand for creating a mismatched entity type error
+    /// Shorthand for creating a mismatched entity type error.
     pub fn mismatched_entity_type(
         entity_id: &EntityId,
         expected: &EntityType,
@@ -47,7 +47,7 @@ impl ValidationError {
         }
     }
 
-    /// Shorthand for creating a missing required field error
+    /// Shorthand for creating a missing required field error.
     pub fn missing_field(entity_id: &EntityId, field_id: &FieldId) -> Self {
         Self {
             entity_id: Some(entity_id.clone()),
@@ -62,7 +62,7 @@ impl ValidationError {
         }
     }
 
-    /// Shorthand for creating a mismatched field type error
+    /// Shorthand for creating a mismatched field type error.
     pub fn mismatched_field_type(
         entity_id: &EntityId,
         field_id: &FieldId,
