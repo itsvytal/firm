@@ -8,7 +8,7 @@ use std::path::PathBuf;
 
 use crate::{EntityId, FieldId};
 
-/// Defines the type of an entity field
+/// The supported types of an entity field.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum FieldType {
     Boolean,
@@ -38,6 +38,7 @@ impl fmt::Display for FieldType {
     }
 }
 
+/// The supported reference types: to an entity or an entity field.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum ReferenceValue {
     Entity(EntityId),
@@ -53,7 +54,7 @@ impl fmt::Display for ReferenceValue {
     }
 }
 
-/// Holds the value of an entity field
+/// The value of an entity field.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum FieldValue {
     Boolean(bool),
@@ -93,7 +94,7 @@ impl fmt::Display for FieldValue {
 }
 
 impl FieldValue {
-    /// Gets the type of the given field value
+    /// Gets the type of the given field value.
     pub fn get_type(&self) -> FieldType {
         match self {
             FieldValue::Boolean(_) => FieldType::Boolean,
@@ -112,62 +113,62 @@ impl FieldValue {
         }
     }
 
-    /// Checks if the field value has the expected type
+    /// Checks if the field value has the expected type.
     pub fn is_type(&self, expected: &FieldType) -> bool {
         &self.get_type() == expected
     }
 }
 
-/// Easy conversion from bool to FieldValue
+/// Convert from bool to FieldValue.
 impl From<bool> for FieldValue {
     fn from(value: bool) -> Self {
         FieldValue::Boolean(value)
     }
 }
 
-/// Easy conversion from &str to FieldValue
+/// Convert from &str to FieldValue.
 impl From<&str> for FieldValue {
     fn from(value: &str) -> Self {
         FieldValue::String(value.to_string())
     }
 }
 
-/// Easy conversion from String to FieldValue
+/// Convert from String to FieldValue.
 impl From<String> for FieldValue {
     fn from(value: String) -> Self {
         FieldValue::String(value)
     }
 }
 
-/// Easy conversion from i64 to FieldValue
+/// Convert from i64 to FieldValue.
 impl From<i64> for FieldValue {
     fn from(value: i64) -> Self {
         FieldValue::Integer(value)
     }
 }
 
-/// Easy conversion from f64 to FieldValue
+/// Convert from f64 to FieldValue.
 impl From<f64> for FieldValue {
     fn from(value: f64) -> Self {
         FieldValue::Float(value)
     }
 }
 
-/// Easy conversion from DateTime<FixedOffset> to FieldValue
+/// Convert from DateTime<FixedOffset> to FieldValue.
 impl From<DateTime<FixedOffset>> for FieldValue {
     fn from(value: DateTime<FixedOffset>) -> Self {
         FieldValue::DateTime(value)
     }
 }
 
-/// Easy conversion from Vec<FieldValue> to FieldValue
+/// Convert from Vec<FieldValue> to FieldValue.
 impl From<Vec<FieldValue>> for FieldValue {
     fn from(value: Vec<FieldValue>) -> Self {
         FieldValue::List(value)
     }
 }
 
-/// Easy conversion from PathBuf to FieldValue
+/// Convert from PathBuf to FieldValue.
 impl From<PathBuf> for FieldValue {
     fn from(value: PathBuf) -> Self {
         FieldValue::Path(value)
