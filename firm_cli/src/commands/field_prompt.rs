@@ -7,7 +7,7 @@ use rust_decimal::Decimal;
 use std::{error::Error, sync::Arc};
 
 use firm_core::{
-    FieldId, FieldType, FieldValue, ReferenceValue, graph::EntityGraph, make_composite_entity_id,
+    FieldId, FieldType, FieldValue, ReferenceValue, graph::EntityGraph, compose_entity_id,
 };
 
 use crate::errors::CliError;
@@ -34,7 +34,7 @@ pub fn prompt_for_field_value(
         }
         FieldType::List => list_prompt(skippable, &field_id_prompt, Arc::clone(&entity_graph)),
         FieldType::DateTime => date_prompt(skippable, &field_id_prompt),
-        FieldType::Path => todo!()
+        FieldType::Path => todo!(),
     }
 }
 
@@ -232,10 +232,10 @@ fn reference_prompt(
     let parts: Vec<&str> = result_str.split('.').collect();
     match parts.len() {
         2 => Ok(Some(FieldValue::Reference(ReferenceValue::Entity(
-            make_composite_entity_id(&parts[0], &parts[1]),
+            compose_entity_id(&parts[0], &parts[1]),
         )))),
         3 => Ok(Some(FieldValue::Reference(ReferenceValue::Field(
-            make_composite_entity_id(&parts[0], &parts[1]),
+            compose_entity_id(&parts[0], &parts[1]),
             FieldId(parts[2].into()),
         )))),
         _ => unreachable!("Parser should have prevented this format."),
@@ -251,7 +251,7 @@ fn parse_reference(
         2 => {
             let entity_type = parts[0];
             let entity_id = parts[1];
-            let composite_id = make_composite_entity_id(entity_type, entity_id);
+            let composite_id = compose_entity_id(entity_type, entity_id);
             match graph.get_entity(&composite_id) {
                 Some(_) => Ok(Validation::Valid),
                 None => Ok(Validation::Invalid(
@@ -262,7 +262,7 @@ fn parse_reference(
         3 => {
             let entity_type = parts[0];
             let entity_id = parts[1];
-            let composite_id = make_composite_entity_id(entity_type, entity_id);
+            let composite_id = compose_entity_id(entity_type, entity_id);
             match graph.get_entity(&composite_id) {
                 Some(entity) => {
                     let field_id = parts[2];
@@ -305,7 +305,7 @@ fn get_reference_suggestions(
             // Suggesting entity IDs
             let entity_type = parts[0];
             let entity_id = parts[1];
-            let composite_id = make_composite_entity_id(entity_type, entity_id);
+            let composite_id = compose_entity_id(entity_type, entity_id);
             let entities = graph.list_by_type(&entity_type.into());
             for entity in entities {
                 if entity.id.as_str().starts_with(composite_id.as_str()) {
@@ -318,7 +318,7 @@ fn get_reference_suggestions(
             let entity_type = parts[0];
             let entity_id = parts[1];
             let partial_field = parts[2];
-            let composite_id = make_composite_entity_id(entity_type, entity_id);
+            let composite_id = compose_entity_id(entity_type, entity_id);
 
             if let Some(entity) = graph.get_entity(&composite_id) {
                 for (field_id, _) in &entity.fields {

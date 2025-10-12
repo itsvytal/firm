@@ -1,9 +1,10 @@
-use std::fmt;
 use convert_case::{Case, Casing};
 use serde::{Deserialize, Serialize};
+use std::fmt;
 
 /// Creates a typed identifier based on an underlying string.
 /// This helps differentiate identifiers so that they are not accidentally mixed.
+/// By convention, we convert the underlying value to snake_case.
 macro_rules! typed_string_id {
     ($name:ident) => {
         #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize, PartialOrd, Ord)]
@@ -45,7 +46,7 @@ typed_string_id!(EntityType);
 
 /// Creates a standard composite Entity ID from the entity type and ID.
 /// This allows entities of different types to share the same ID.
-pub fn make_composite_entity_id(entity_type: &str, entity_id: &str) -> EntityId {
+pub fn compose_entity_id(entity_type: &str, entity_id: &str) -> EntityId {
     EntityId::new(format!(
         "{}.{}",
         entity_type.to_string().to_lowercase(),

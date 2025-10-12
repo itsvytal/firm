@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use convert_case::{Case, Casing};
-use firm_core::{Entity, EntitySchema, make_composite_entity_id};
+use firm_core::{Entity, EntitySchema, compose_entity_id};
 use firm_lang::generate::generate_dsl;
 use firm_lang::workspace::Workspace;
 use inquire::{Confirm, Select, Text};
@@ -59,7 +59,7 @@ pub fn add_entity(
     let mut entity_id = chosen_id.clone();
     let mut id_counter = 1;
     while graph
-        .get_entity(&make_composite_entity_id(&chosen_type_str, &entity_id))
+        .get_entity(&compose_entity_id(&chosen_type_str, &entity_id))
         .is_some()
     {
         entity_id = format!("{}_{}", chosen_id, id_counter);

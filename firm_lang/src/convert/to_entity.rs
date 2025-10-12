@@ -1,4 +1,4 @@
-use firm_core::{Entity, FieldId, FieldValue, ReferenceValue, make_composite_entity_id};
+use firm_core::{Entity, FieldId, FieldValue, ReferenceValue, compose_entity_id};
 
 use super::EntityConversionError;
 use crate::parser::{ParsedEntity, ParsedValue};
@@ -13,7 +13,7 @@ impl TryFrom<&ParsedEntity<'_>> for Entity {
             .ok_or(EntityConversionError::MissingEntityType)?;
 
         let entity_id = parsed.id().ok_or(EntityConversionError::MissingEntityId)?;
-        let composite_id = make_composite_entity_id(entity_type_str, entity_id);
+        let composite_id = compose_entity_id(entity_type_str, entity_id);
         let mut entity = Entity::new(composite_id, entity_type_str.into());
 
         for field in parsed.fields() {
@@ -52,7 +52,7 @@ impl TryFrom<ParsedValue> for FieldValue {
                 entity_type,
                 entity_id,
             } => {
-                let composite_id = make_composite_entity_id(&entity_type, &entity_id);
+                let composite_id = compose_entity_id(&entity_type, &entity_id);
                 Ok(FieldValue::Reference(ReferenceValue::Entity(composite_id)))
             }
             ParsedValue::FieldReference {
@@ -60,7 +60,7 @@ impl TryFrom<ParsedValue> for FieldValue {
                 entity_id,
                 field_id,
             } => {
-                let composite_id = make_composite_entity_id(&entity_type, &entity_id);
+                let composite_id = compose_entity_id(&entity_type, &entity_id);
                 Ok(FieldValue::Reference(ReferenceValue::Field(
                     composite_id,
                     FieldId(field_id),

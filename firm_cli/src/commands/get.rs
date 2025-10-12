@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use firm_core::make_composite_entity_id;
+use firm_core::compose_entity_id;
 use firm_lang::workspace::Workspace;
 
 use crate::errors::CliError;
@@ -19,7 +19,7 @@ pub fn get_entity_by_id(
     ui::header("Getting entity by ID");
     let graph = load_current_graph(&workspace_path)?;
 
-    let id = make_composite_entity_id(&entity_type, &entity_id);
+    let id = compose_entity_id(&entity_type, &entity_id);
     match graph.get_entity(&id) {
         Some(entity) => {
             ui::success(&format!(
@@ -55,7 +55,7 @@ pub fn get_related_entities(
     ui::header("Getting related entities");
     let graph = load_current_graph(&workspace_path)?;
 
-    let id = make_composite_entity_id(&entity_type, &entity_id);
+    let id = compose_entity_id(&entity_type, &entity_id);
     match graph.get_related(&id, direction.clone().map(|d| d.into())) {
         Some(entities) => {
             let direction_text = match direction {
