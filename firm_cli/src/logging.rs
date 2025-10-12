@@ -1,23 +1,25 @@
-use std::sync::OnceLock;
-
-use super::ui;
 use indicatif::MultiProgress;
 use indicatif_log_bridge::LogWrapper;
 use log::{Level, Log, Metadata, Record};
+use std::sync::OnceLock;
 
-/// Tracks indicatif progress bars so they can be stalled when outputting logs
+use super::ui;
+
+/// Tracks indicatif progress bars so they can be stalled when outputting logs.
 static MULTI_PROGRESS: OnceLock<MultiProgress> = OnceLock::new();
 
+/// Gets or creates a global indicatif progress bar tracker.
 pub fn get_multi_progress() -> &'static MultiProgress {
     MULTI_PROGRESS.get_or_init(|| MultiProgress::new())
 }
 
-/// A logger implementation that outputs crate logs to console UI messages
+/// A logger implementation that outputs library logs to console UI messages.
 struct UiLogger {
     verbose: bool,
 }
 
 impl Log for UiLogger {
+    /// Configures logger to take logs from firm libraries.
     fn enabled(&self, metadata: &Metadata) -> bool {
         // Determine if the log originates from a firm crate
         let target = metadata.target();
@@ -31,8 +33,8 @@ impl Log for UiLogger {
         }
     }
 
+    /// Pipes library logs to the appropriate UI message.
     fn log(&self, record: &Record) {
-        // Pipe library logs to the appropriate UI message
         if self.enabled(record.metadata()) {
             match record.level() {
                 Level::Error => ui::error(&record.args().to_string()),
@@ -47,11 +49,11 @@ impl Log for UiLogger {
     fn flush(&self) {}
 }
 
-/// Initialize logging for the CLI
+/// Initializes logging for the CLI.
 pub fn initialize(verbose: bool) -> Result<(), log::SetLoggerError> {
     let ui_logger = UiLogger { verbose };
 
-    // Wrap it with LogWrapper for indicatif handling and set that as the global logger
+    // Wrap logger, allowing indicatif progress bars to be suspended when we output logs
     let wrapped_logger = LogWrapper::new(get_multi_progress().clone(), Box::new(ui_logger));
     log::set_boxed_logger(Box::new(wrapped_logger))?;
 

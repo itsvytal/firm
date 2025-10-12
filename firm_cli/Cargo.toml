@@ -6,6 +6,10 @@ description = "Interact with Firm from the command line."
 license = "AGPL-3.0"
 repository = "https://github.com/42futures/firm"
 
+[[bin]]
+name = "firm"
+path = "src/main.rs"
+
 [dependencies]
 firm_core = { path = "../firm_core" }
 firm_lang = { path = "../firm_lang" }

@@ -1,12 +1,14 @@
 use firm_core::graph::EntityGraph;
 use std::{env, fs, path::PathBuf};
 
-use crate::errors::CliError;
-use crate::ui::{self};
+use super::errors::CliError;
+use super::ui::{self};
 
 pub const CURRENT_GRAPH_NAME: &str = "current.firm.graph";
 pub const BACKUP_GRAPH_NAME: &str = "backup.firm.graph";
 
+/// Gets the Firm workspace path.
+/// If it was provided from CLI args, use that, otherwise use current working directory.
 pub fn get_workspace_path(directory_path: &Option<PathBuf>) -> Result<PathBuf, CliError> {
     let path = match directory_path {
         Some(path) => path.clone(),
@@ -23,6 +25,8 @@ pub fn get_workspace_path(directory_path: &Option<PathBuf>) -> Result<PathBuf, C
     Ok(path)
 }
 
+/// Saves an entity graph to the workspace root.
+/// If one already exists, we back it up.
 pub fn save_graph_with_backup(
     workspace_path: &PathBuf,
     graph: &EntityGraph,
@@ -56,6 +60,7 @@ pub fn save_graph_with_backup(
     Ok(())
 }
 
+/// Loads an entity graph from the workspace root.
 pub fn load_current_graph(workspace_path: &PathBuf) -> Result<EntityGraph, CliError> {
     let current_graph_path = workspace_path.join(CURRENT_GRAPH_NAME);
 
