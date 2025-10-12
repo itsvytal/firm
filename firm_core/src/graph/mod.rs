@@ -9,11 +9,12 @@ use serde::{Deserialize, Deserializer, Serialize, Serializer};
 mod graph_errors;
 mod query;
 
-pub use graph_errors::{EntityAlreadyExistsError, QueryError};
+pub use graph_errors::GraphError;
 pub use petgraph::Direction;
 
 use crate::{Entity, EntityId, EntityType, FieldId, FieldValue, ReferenceValue};
 
+/// Defines a relationship between entities in the graph.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum Relationship {
     EntityReference {
@@ -25,6 +26,7 @@ pub enum Relationship {
     },
 }
 
+/// The entity graph tracks all Firm entities and their relationships.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EntityGraph {
     graph: Graph<Entity, Relationship>,
@@ -37,7 +39,7 @@ pub struct EntityGraph {
 }
 
 impl EntityGraph {
-    /// Creates a new entity graph, ready to be built
+    /// Creates a new entity graph, ready to be populated and built.
     pub fn new() -> Self {
         Self {
             graph: Graph::new(),
@@ -46,6 +48,7 @@ impl EntityGraph {
         }
     }
 
+    /// Clears graph data, allowing it to be populated and built from scratch.
     pub fn clear(&mut self) {
         debug!("Clearing graph data");
         self.graph.clear();
@@ -54,15 +57,13 @@ impl EntityGraph {
     }
 
     /// Adds a new entity to the graph.
-    /// Remember to also update the edges after the graph has desired entities
-    pub fn add_entity(&mut self, entity: Entity) -> Result<(), EntityAlreadyExistsError> {
+    /// Note: After an entity is added, the graph should be re-built.
+    pub fn add_entity(&mut self, entity: Entity) -> Result<(), GraphError> {
         debug!("Adding new entity '{}' to graph", entity.id);
 
         if self.entity_map.contains_key(&entity.id) {
             debug!("Entity '{}' already exists, skipping add", entity.id);
-            return Err(EntityAlreadyExistsError {
-                entity_id: entity.id,
-            });
+            return Err(GraphError::EntityAlreadyExists(entity.id));
         }
 
         let node_index = self.graph.add_node(entity.clone());
@@ -76,8 +77,8 @@ impl EntityGraph {
         Ok(())
     }
 
-    /// Adds a collection of entities to the graph
-    pub fn add_entities(&mut self, entities: Vec<Entity>) -> Result<(), EntityAlreadyExistsError> {
+    /// Adds a collection of entities to the graph.
+    pub fn add_entities(&mut self, entities: Vec<Entity>) -> Result<(), GraphError> {
         for entity in entities {
             self.add_entity(entity)?;
         }
@@ -85,14 +86,17 @@ impl EntityGraph {
         Ok(())
     }
 
-    /// Builds relationships from scratch for all entities in the graph
+    /// Builds relationships for all entities in the graph.
+    ///
+    /// Note: We always clear the edges and build from scratch.
+    /// This means that it's best to add all your entities in bulk first, then build.
+    /// The implementation could be improved by letting the relationships be progressively built.
     pub fn build(&mut self) {
         debug!(
             "Building relationships for graph with {} entities",
             self.graph.node_count()
         );
 
-        // TODO: This is quite ineffecient if iteratively updating the graph
         self.graph.clear_edges();
 
         // Collect the edges to add first to avoid borrowing conflicts
@@ -119,6 +123,8 @@ impl EntityGraph {
         }
     }
 
+    /// Map graph relationships from reference fields.
+    /// We do this by populating an edge list which are later added to the graph.
     fn collect_relationships_from_field(
         &self,
         from_node: NodeIndex,
@@ -159,7 +165,7 @@ impl EntityGraph {
     }
 }
 
-// Custom serialization for entity_type_map
+/// Custom serialization for the entity type map.
 fn serialize_entity_type_map<S>(
     map: &HashMap<EntityType, Vec<NodeIndex>>,
     serializer: S,
@@ -174,6 +180,7 @@ where
     ser_map.end()
 }
 
+/// Custom deserialization for the entity type map.
 fn deserialize_entity_type_map<'de, D>(
     deserializer: D,
 ) -> Result<HashMap<EntityType, Vec<NodeIndex>>, D::Error>
@@ -208,7 +215,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Entity, EntityId, FieldValue, EntityType};
+    use crate::{Entity, EntityId, EntityType, FieldValue};
 
     // Helper functions
     fn create_organization(id: &str, name: &str) -> Entity {
@@ -217,7 +224,8 @@ mod tests {
     }
 
     fn create_person(id: &str, name: &str) -> Entity {
-        Entity::new(EntityId::new(id), EntityType::new("person")).with_field(FieldId::new("name"), name)
+        Entity::new(EntityId::new(id), EntityType::new("person"))
+            .with_field(FieldId::new("name"), name)
     }
 
     fn create_person_with_employer(id: &str, name: &str, employer_id: &str) -> Entity {
@@ -274,7 +282,7 @@ mod tests {
         let result = graph.add_entity(entity2);
 
         assert!(result.is_err());
-        if let Err(EntityAlreadyExistsError { entity_id }) = result {
+        if let Err(GraphError::EntityAlreadyExists(entity_id)) = result {
             assert_eq!(entity_id, EntityId::new("duplicate_id"));
         }
 

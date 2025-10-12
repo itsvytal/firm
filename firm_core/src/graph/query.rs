@@ -1,13 +1,13 @@
 use log::debug;
 use petgraph::{Direction, visit::EdgeRef};
 
-use super::{EntityGraph, QueryError, Relationship};
+use super::{EntityGraph, GraphError, Relationship};
 use crate::{Entity, EntityId, EntityType, FieldId, FieldValue, ReferenceValue};
 
 use std::collections::HashSet;
 
 impl EntityGraph {
-    /// Gets an entity in the graph by its ID
+    /// Gets an entity in the graph by its ID.
     pub fn get_entity(&self, id: &EntityId) -> Option<&Entity> {
         debug!("Looking up entity '{}'", id);
 
@@ -16,25 +16,42 @@ impl EntityGraph {
             .and_then(|&node_index| self.graph.node_weight(node_index))
     }
 
-    /// Resolves an entity reference to the actual entity
+    /// Resolves an entity reference to the actual entity.
     pub fn resolve_entity_reference(
         &self,
         field_value: &FieldValue,
-    ) -> Result<&Entity, QueryError> {
+    ) -> Result<&Entity, GraphError> {
         debug!("Resolving entity reference: {:?}", field_value);
 
         match field_value {
             FieldValue::Reference(ReferenceValue::Entity(entity_id)) => self
                 .get_entity(entity_id)
-                .ok_or_else(|| QueryError::EntityNotFound(entity_id.clone())),
-            _ => Err(QueryError::NotAnEntityReference),
+                .ok_or_else(|| GraphError::EntityNotFound(entity_id.clone())),
+            _ => Err(GraphError::NotAnEntityReference),
         }
     }
 
+    /// Resolves a field reference to the actual field value.
+    pub fn resolve_field_reference(
+        &self,
+        field_value: &FieldValue,
+    ) -> Result<&FieldValue, GraphError> {
+        debug!("Resolving field reference: {:?}", field_value);
+
+        match field_value {
+            FieldValue::Reference(ReferenceValue::Field(entity_id, field_id)) => {
+                self.search_field_reference(entity_id, field_id, 10, &mut HashSet::new())
+            }
+            _ => Err(GraphError::NotAFieldReference),
+        }
+    }
+
+    /// Gets a collection of all entity types present.
     pub fn get_all_entity_types(&self) -> Vec<EntityType> {
         self.entity_type_map.keys().cloned().collect()
     }
 
+    /// Gets all entities of a specific type.
     pub fn list_by_type(&self, entity_type: &EntityType) -> Vec<&Entity> {
         match self.entity_type_map.get(entity_type) {
             Some(nodes) => nodes
@@ -45,6 +62,10 @@ impl EntityGraph {
         }
     }
 
+    /// Gets all entities that references an entity ID.
+    ///
+    /// Edges in the graph are directed, and here we can choose if we want only
+    /// incoming references, outgoing references or both.
     pub fn get_related(&self, id: &EntityId, direction: Option<Direction>) -> Option<Vec<&Entity>> {
         match self.entity_map.get(id) {
             Some(node_index) => {
@@ -89,21 +110,6 @@ impl EntityGraph {
         }
     }
 
-    /// Resolves a field reference to the actual field value
-    pub fn resolve_field_reference(
-        &self,
-        field_value: &FieldValue,
-    ) -> Result<&FieldValue, QueryError> {
-        debug!("Resolving field reference: {:?}", field_value);
-
-        match field_value {
-            FieldValue::Reference(ReferenceValue::Field(entity_id, field_id)) => {
-                self.search_field_reference(entity_id, field_id, 10, &mut HashSet::new())
-            }
-            _ => Err(QueryError::NotAFieldReference),
-        }
-    }
-
     /// Searches for a field reference on a given entity by traversing the graph
     fn search_field_reference(
         &self,
@@ -111,33 +117,33 @@ impl EntityGraph {
         field_id: &FieldId,
         max_depth: usize,
         visited: &mut HashSet<(EntityId, FieldId)>,
-    ) -> Result<&FieldValue, QueryError> {
+    ) -> Result<&FieldValue, GraphError> {
         if max_depth == 0 {
             debug!(
                 "Max depth exceeded for field reference: {}.{}",
                 entity_id, field_id
             );
 
-            return Err(QueryError::MaxDepthExceeded);
+            return Err(GraphError::MaxDepthExceeded);
         }
 
         // Check for cycles
         let reference_key = (entity_id.clone(), field_id.clone());
         if visited.contains(&reference_key) {
             debug!("Cyclic reference detected: {}.{}", entity_id, field_id);
-            return Err(QueryError::CyclicReference);
+            return Err(GraphError::CyclicReference);
         }
         visited.insert(reference_key);
 
         // Get entity
         let entity = self
             .get_entity(entity_id)
-            .ok_or_else(|| QueryError::EntityNotFound(entity_id.clone()))?;
+            .ok_or_else(|| GraphError::EntityNotFound(entity_id.clone()))?;
 
         // Get field
         let field = entity
             .get_field(field_id)
-            .ok_or_else(|| QueryError::FieldNotFound(entity_id.clone(), field_id.clone()))?;
+            .ok_or_else(|| GraphError::FieldNotFound(entity_id.clone(), field_id.clone()))?;
 
         // If it's another field reference, resolve it
         match field {
@@ -146,11 +152,11 @@ impl EntityGraph {
                 let source_node = self
                     .entity_map
                     .get(entity_id)
-                    .ok_or_else(|| QueryError::EntityNotFound(entity_id.clone()))?;
+                    .ok_or_else(|| GraphError::EntityNotFound(entity_id.clone()))?;
                 let target_node = self
                     .entity_map
                     .get(target_entity_id)
-                    .ok_or_else(|| QueryError::EntityNotFound(target_entity_id.clone()))?;
+                    .ok_or_else(|| GraphError::EntityNotFound(target_entity_id.clone()))?;
 
                 // Check if there's a field reference edge between these nodes
                 let mut edge_found = false;
@@ -175,7 +181,7 @@ impl EntityGraph {
                         visited,
                     )
                 } else {
-                    Err(QueryError::GraphNotBuilt)
+                    Err(GraphError::GraphNotBuilt)
                 }
             }
             _ => Ok(field),
@@ -184,19 +190,19 @@ impl EntityGraph {
 }
 
 impl FieldValue {
-    /// Resolves the entity referenced by this field by querying the entity graph
+    /// Convenience method to resolve entity references directly on field values.
     pub fn resolve_entity_reference<'a>(
         &'a self,
         graph: &'a EntityGraph,
-    ) -> Result<&'a Entity, QueryError> {
+    ) -> Result<&'a Entity, GraphError> {
         graph.resolve_entity_reference(self)
     }
 
-    /// Resolves the field reference by querying the entity graph
+    /// Convenience method to resolve field references directly on field values.
     pub fn resolve_field_reference<'a>(
         &'a self,
         graph: &'a EntityGraph,
-    ) -> Result<&'a FieldValue, QueryError> {
+    ) -> Result<&'a FieldValue, GraphError> {
         graph.resolve_field_reference(self)
     }
 }
@@ -204,7 +210,7 @@ impl FieldValue {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{FieldId, EntityType};
+    use crate::{EntityType, FieldId};
 
     #[test]
     fn test_get_entity_by_id() {
@@ -259,7 +265,7 @@ mod tests {
         assert!(resolved_invalid.is_err());
         assert_eq!(
             resolved_invalid.unwrap_err(),
-            QueryError::EntityNotFound(EntityId::new("non_existing"))
+            GraphError::EntityNotFound(EntityId::new("non_existing"))
         );
 
         // Test non-entity-reference field value
@@ -268,13 +274,13 @@ mod tests {
         assert!(resolved_string.is_err());
         assert_eq!(
             resolved_string.unwrap_err(),
-            QueryError::NotAnEntityReference
+            GraphError::NotAnEntityReference
         );
 
         let bool_field = FieldValue::Boolean(true);
         let resolved_bool = graph.resolve_entity_reference(&bool_field);
         assert!(resolved_bool.is_err());
-        assert_eq!(resolved_bool.unwrap_err(), QueryError::NotAnEntityReference);
+        assert_eq!(resolved_bool.unwrap_err(), GraphError::NotAnEntityReference);
     }
 
     #[test]
@@ -374,7 +380,7 @@ mod tests {
         ));
         let resolved = graph.resolve_field_reference(&field_ref);
         assert!(resolved.is_err());
-        assert_eq!(resolved.unwrap_err(), QueryError::CyclicReference);
+        assert_eq!(resolved.unwrap_err(), GraphError::CyclicReference);
     }
 
     #[test]
@@ -412,7 +418,7 @@ mod tests {
         ));
         let resolved = graph.resolve_field_reference(&field_ref);
         assert!(resolved.is_err());
-        assert_eq!(resolved.unwrap_err(), QueryError::MaxDepthExceeded);
+        assert_eq!(resolved.unwrap_err(), GraphError::MaxDepthExceeded);
     }
 
     #[test]
@@ -427,7 +433,7 @@ mod tests {
         assert!(resolved.is_err());
         assert_eq!(
             resolved.unwrap_err(),
-            QueryError::EntityNotFound(EntityId::new("missing_entity"))
+            GraphError::EntityNotFound(EntityId::new("missing_entity"))
         );
     }
 
@@ -448,7 +454,7 @@ mod tests {
         assert!(resolved.is_err());
         assert_eq!(
             resolved.unwrap_err(),
-            QueryError::FieldNotFound(EntityId::new("test_entity"), FieldId::new("missing_field"))
+            GraphError::FieldNotFound(EntityId::new("test_entity"), FieldId::new("missing_field"))
         );
     }
 
@@ -460,17 +466,17 @@ mod tests {
         let string_field = FieldValue::String("not a reference".to_string());
         let resolved = graph.resolve_field_reference(&string_field);
         assert!(resolved.is_err());
-        assert_eq!(resolved.unwrap_err(), QueryError::NotAFieldReference);
+        assert_eq!(resolved.unwrap_err(), GraphError::NotAFieldReference);
 
         let bool_field = FieldValue::Boolean(true);
         let resolved = graph.resolve_field_reference(&bool_field);
         assert!(resolved.is_err());
-        assert_eq!(resolved.unwrap_err(), QueryError::NotAFieldReference);
+        assert_eq!(resolved.unwrap_err(), GraphError::NotAFieldReference);
 
         let entity_ref = FieldValue::Reference(ReferenceValue::Entity(EntityId::new("entity")));
         let resolved = graph.resolve_field_reference(&entity_ref);
         assert!(resolved.is_err());
-        assert_eq!(resolved.unwrap_err(), QueryError::NotAFieldReference);
+        assert_eq!(resolved.unwrap_err(), GraphError::NotAFieldReference);
     }
 
     #[test]
@@ -499,7 +505,7 @@ mod tests {
         ));
         let resolved = graph.resolve_field_reference(&field_ref);
         assert!(resolved.is_err());
-        assert_eq!(resolved.unwrap_err(), QueryError::GraphNotBuilt);
+        assert_eq!(resolved.unwrap_err(), GraphError::GraphNotBuilt);
     }
 
     #[test]
@@ -521,7 +527,7 @@ mod tests {
         let string_field = FieldValue::String("not a reference".to_string());
         let resolved = string_field.resolve_entity_reference(&graph);
         assert!(resolved.is_err());
-        assert_eq!(resolved.unwrap_err(), QueryError::NotAnEntityReference);
+        assert_eq!(resolved.unwrap_err(), GraphError::NotAnEntityReference);
     }
 
     #[test]

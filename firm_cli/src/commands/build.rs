@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use firm_core::graph::EntityGraph;
+use firm_core::graph::{EntityGraph, GraphError};
 use firm_lang::workspace::{Workspace, WorkspaceBuild, WorkspaceError};
 
 use crate::errors::CliError;
@@ -71,10 +71,16 @@ pub fn build_graph(build: &WorkspaceBuild) -> Result<EntityGraph, CliError> {
     let entity_result = graph.add_entities(build.entities.clone());
     if let Err(e) = entity_result {
         spinner.finish_and_clear();
-        ui::error(&format!(
-            "Entities with duplicate IDs '{}' cannot be added to the graph",
-            e.entity_id
-        ));
+
+        match e {
+            GraphError::EntityAlreadyExists(entity_id) => {
+                ui::error(&format!(
+                    "Entities with duplicate IDs '{}' cannot be added to the graph",
+                    entity_id
+                ));
+            }
+            _ => (),
+        }
 
         return Err(CliError::BuildError);
     }

@@ -1,12 +1,9 @@
 use crate::{EntityId, FieldId};
 
-#[derive(Debug, Clone)]
-pub struct EntityAlreadyExistsError {
-    pub entity_id: EntityId,
-}
-
+/// The types of errors you can get when interacting with the graph.
 #[derive(Debug, Clone, PartialEq)]
-pub enum QueryError {
+pub enum GraphError {
+    EntityAlreadyExists(EntityId),
     EntityNotFound(EntityId),
     FieldNotFound(EntityId, FieldId),
     CyclicReference,
