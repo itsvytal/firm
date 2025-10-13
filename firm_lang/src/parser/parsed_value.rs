@@ -308,7 +308,8 @@ impl ParsedValue {
         }
     }
 
-    /// Parses boolean values (`true` or `false`).
+    /// Parses file path values.
+    /// TODO: We need to make these relative to the workspace.
     fn parse_path(raw: &str) -> Result<ParsedValue, ValueParseError> {
         let raw_path = raw.replace("path\"", "").trim_matches('"').to_string();
         let path = PathBuf::from(raw_path);
