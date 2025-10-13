@@ -52,3 +52,4 @@ jobs:
         with:
           executable-name: firm
           target: ${{ matrix.platform.target }}
+          changes-file: CHANGES.md
