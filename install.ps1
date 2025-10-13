@@ -13,17 +13,16 @@ if ($Arch.StartsWith("x64") -or $Arch.StartsWith("amd64")) {
     exit 1
 }
 
-$Url = "https://github.com/$GitHubRepo/releases/latest/download/$Archive.tar.gz"
+$Url = "https://github.com/$GitHubRepo/releases/latest/download/$Archive.zip"
 
 # Download archive
 Write-Host "Downloading $Name..."
-$TempArchive = "$env:TEMP\$Archive.tar.gz"
+$TempArchive = "$env:TEMP\$Archive.zip"
 Invoke-WebRequest -Uri $Url -OutFile $TempArchive
 
 # Extract archive
 $TempExtract = "$env:TEMP\$Archive"
-New-Item -ItemType Directory -Path $TempExtract -Force | Out-Null
-tar -xzf $TempArchive -C $TempExtract
+Expand-Archive -Path $TempArchive -DestinationPath $TempExtract -Force
 
 # Install to user's local bin
 $InstallDir = "$env:LOCALAPPDATA\Programs\$Name"
