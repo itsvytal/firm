@@ -14,6 +14,8 @@ Firm lets you define your business entities (people, organizations, projects, ta
 The Firm CLI is available to download via Github Releases. Install scripts are provided for desktop platforms to make that process easy.
 
 ### Linux and macOS
+Run the following command to download and run the install script:
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/42futures/firm/main/install.sh | sudo bash
 ```
@@ -311,4 +313,4 @@ We separate objective reality from business relationships:
 
 Entities reference each other rather than extending. One `Person` can be referenced by multiple `Contact`, `Employee`, and `Partner` entities simultaneously.
 
-When the entity graph is built, all `Reference` values automatically create directed edges between entities. This enables traversal queries like "find all Projects for Contacts whose Person works at Organization X" without complex joins.
+When the entity graph is built, all `Reference` values automatically create directed edges between entities. This enables traversal queries like "find all Tasks for Opportunities whose Contacts work at Organization X" without complex joins.
