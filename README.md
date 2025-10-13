@@ -1,22 +1,40 @@
-# Business-as-code
-Firm is a text-based work management system for technologists.
+# Firm: Business-as-code
+A text-based work management system for technologists.
 
-Firm lets you define your business entities (people, organizations, projects, tasks) in a declarative DSL, then represent it as a queryable graph that you can manage with a CLI, version control, and high-level automations.
+## Why?
+Modern businesses are natively digital, but lack a unified view. Your data is scattered across SaaS tools you don't control, so you piece together answers by jumping between platforms.
 
-## Features
-- **Map your business:** Strategy to execution in version-controlled plain text.
-- **Work management:** Project and task tracking in the command line.
-- **Local-first:** Everything important in one place (that you own).
-- **Rich relationships:** Link strategies, customers, projects, and tasks.
-- **Automatable:** Hook into the workspace using the Firm CLI or Rust package.
+Your business is a graph: customers link to projects, projects link to tasks, people link to organizations. Firm lets you define these relationships in plain text files (you own!).
+
+Version controlled, locally stored and structured as code with the Firm DSL. This structured representation of your work, *business-as-code*, makes your business readable to yourself and to the robots that help you run it.
+
+### Features
+- **Everything in one place:** Organizations, contacts, projects, and how they relate.
+- **Own your data:** Plain text files and tooling that runs on your machine.
+- **Open data model:** Tailor to your business with custom schemas.
+- **Automate anything:** Search, report, integrate, whatever. It's just code.
+- **AI-ready:** LLMs can read, write, and query your business structure.
+
+## Installation
+The Firm CLI is available to download via Github Releases. Install scripts are provided for desktop platforms to make that process easy.
+
+### Linux and macOS
+```bash
+curl -fsSL https://raw.githubusercontent.com/42futures/firm/main/install.sh | sudo bash
+```
+
+### Windows
+```bash
+irm https://raw.githubusercontent.com/42futures/firm/main/install.ps1 | iex
+```
 
 ## Getting started
-Firm operates on a "workspace", which is a directory containing all your `.firm` DSL files. The Firm CLI processes every file in this workspace to build a unified, queryable graph of your business.
+Firm operates on a "workspace": a directory containing all your `.firm` DSL files. The Firm CLI processes every file in this workspace to build a unified, queryable graph of your business.
 
-The first step is to add an entity to your workspace. You can do this either by using the CLI or by writing the DSL manually.
+The first step is to add an entity to your workspace. You can do this either by using the CLI or by writing the DSL yourself.
 
 ### Add entities with the CLI
-Use `firm add` to interactively generate new entities. Out of the box, Firm supports a set of pre-built entity schemas for org mapping, customer relations and work management. The CLI will prompt you for the necessary info and generate corresponding DSL automatically.
+Use `firm add` to interactively generate new entities. Out of the box, Firm supports a set of pre-built entity schemas for org mapping, customer relations and work management. The CLI will prompt you for the necessary info and generate corresponding DSL.
 
 ```bash
 $ firm add
@@ -34,7 +52,7 @@ Writing generated DSL to file my_workspace/generated/organization.firm
 ```
 
 ### Write DSL manually
-Alternatively, you can create a `.firm` file and write the DSL yourself. This gives you more control and is ideal for defining multiple entities at once.
+Alternatively, you can create a `.firm` file and write the DSL yourself.
 
 ```firm
 organization megacorp {
@@ -47,7 +65,7 @@ organization megacorp {
 Both of these methods achieve the same result: a new entity defined in your Firm workspace.
 
 ### Querying the workspace
-Once you have entities in your workspace, you can query them using the CLI. By default, Firm will "pretty" output entities but can also be configured for JSON, allowing for downstream automations.
+Once you have entities in your workspace, you can query them using the CLI.
 
 #### Listing entities
 Use `firm list` to see all entities of a specific type.
@@ -81,7 +99,7 @@ Email: john@doe.com
 ```
 
 #### Exploring relationships
-The power of Firm lies in its ability to build a graph of your business. Use `firm related` to explore connections to/from any entity.
+The power of Firm lies in its ability to travel a graph of your business. Use `firm related` to explore connections to/from any entity.
 
 ```bash
 $ firm related contact john_doe
@@ -101,7 +119,7 @@ Primary contact ref: contact.john_doe
 You've seen the basic commands for interacting with a Firm workspace. The project is a work-in-progress, and you can expect to see more sophisticated features added over time, including a more powerful query engine and tools for running business workflows directly from the CLI.
 
 ## Using Firm as a library
-Beyond the CLI, you can integrate Firm's core logic directly into your own software using the `firm_core` and `firm_lang` Rust packages. This allows you to build custom tools, automations, and integrations on top of Firm.
+Beyond the CLI, you can integrate Firm's core logic directly into your own software using the `firm_core` and `firm_lang` Rust packages. This allows you to build more powerful automations and integrations on top of Firm.
 
 First, add the Firm crates to your `Cargo.toml`:
 
@@ -141,7 +159,7 @@ This gives you full access to the underlying data structures, providing a founda
 
 Firm is organized as a Rust workspace with three crates:
 
-### `firm-core`
+### `firm_core`
 Core data structures and graph operations.
 
 - Entity data model
@@ -149,7 +167,7 @@ Core data structures and graph operations.
 - Relationship graph with query capabilities
 - Entity schemas and validation
 
-### `firm-lang`
+### `firm_lang`
 DSL parsing and generation.
 
 - Tree-sitter-based parser for `.firm` files
@@ -159,7 +177,7 @@ DSL parsing and generation.
 
 Grammar is defined in [tree-sitter-firm](https://github.com/42futures/tree-sitter-firm).
 
-### `firm-cli`
+### `firm_cli`
 
 Command-line interface, making the Firm workspace interactive.
 
@@ -210,25 +228,20 @@ my_task design_homepage {
     due_date = 2024-12-01 at 17:00 UTC   // DateTime
     tags = ["ui", "ux"]                  // List
     assignee = person.jane_doe           // Reference
-    deliverable = path"homepage.zip"     // Path
+    deliverable = path"./homepage.zip"   // Path
 }
 ```
 
 **In Rust**, these are represented by the `FieldValue` enum:
 
 ```rust
-// A reference to another entity
-let assignee = FieldValue::Reference(
-    ReferenceValue::Entity(
-        EntityId::new("person.jane_doe")
-    )
-);
+let value = FieldValue::Integer(42);
 ```
 
 ### Relationships and the entity graph
 The power of Firm comes from connecting entities. You create relationships using `Reference` fields.
 
-When Firm processes your workspace, it builds the **entity graph** representing of all your entities (as nodes) and their relationships (as directed edges). This graph is what allows for traversal and querying.
+When Firm processes your workspace, it builds the *entity graph* representing of all your entities (as nodes) and their relationships (as directed edges). This graph is what allows for traversal and querying.
 
 **In the DSL**, creating a relationship is as simple as referencing another entity's ID.
 
@@ -303,4 +316,4 @@ We separate objective reality from business relationships:
 
 Entities reference each other rather than extending. One `Person` can be referenced by multiple `Contact`, `Employee`, and `Partner` entities simultaneously.
 
-When the entity graph is built, all `Reference` values automatically create directed edges between entities. This enables traversal queries like "find all Projects for Contacts whose Person works at Organization X" without complex joins.
+When the entity graph is built, all `Reference` values automatically create directed edges between entities. This enables traversal queries like "find all Tasks for Opportunities whose Contacts work at Organization X" without complex joins.

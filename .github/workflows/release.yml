@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  push:
+    branches: ["release/*"]
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Run tests
+        run: cargo test
+
+  release:
+    name: Build - ${{ matrix.platform.os-name }}
+    needs: validate
+    strategy:
+      matrix:
+        platform:
+          - os-name: Linux-x86_64
+            runs-on: ubuntu-24.04
+            target: x86_64-unknown-linux-musl
+            archive-name: firm-linux-amd64
+
+          - os-name: Linux-aarch64
+            runs-on: ubuntu-24.04
+            target: aarch64-unknown-linux-musl
+            archive-name: firm-linux-arm64
+
+          - os-name: macOS-x86_64
+            runs-on: macOS-latest
+            target: x86_64-apple-darwin
+            archive-name: firm-darwin-amd64
+
+          - os-name: macOS-aarch64
+            runs-on: macOS-latest
+            target: aarch64-apple-darwin
+            archive-name: firm-darwin-arm64
+
+          - os-name: Windows-x86_64
+            runs-on: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive-name: firm-windows-amd64
+
+    runs-on: ${{ matrix.platform.runs-on }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Build binary
+        uses: houseabsolute/actions-rust-cross@v1
+        with:
+          command: build
+          target: ${{ matrix.platform.target }}
+          args: "--locked --release"
+          strip: false
+      - name: Publish artifacts
+        uses: houseabsolute/actions-rust-release@v0
+        with:
+          executable-name: firm
+          target: ${{ matrix.platform.target }}
+          archive-name: ${{ matrix.platform.archive-name }}
+          changes-file: CHANGES.md
