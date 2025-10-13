@@ -5,8 +5,20 @@ on:
     branches: ["release/*"]
 
 jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Run tests
+        run: cargo test
+
   release:
     name: Release - ${{ matrix.platform.os-name }}
+    needs: validate
     strategy:
       matrix:
         platform:
@@ -40,8 +52,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Run tests
-        run: cargo test --verbose
       - name: Build binary
         uses: houseabsolute/actions-rust-cross@v1
         with:
