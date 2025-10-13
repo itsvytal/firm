@@ -1,15 +1,14 @@
-use std::path::PathBuf;
-
 use firm_core::compose_entity_id;
 use firm_lang::workspace::Workspace;
+use std::path::PathBuf;
 
+use super::{build_workspace, load_workspace_files};
 use crate::errors::CliError;
 use crate::files::load_current_graph;
 use crate::query::CliDirection;
 use crate::ui::{self, OutputFormat};
 
-use super::{build_workspace, load_workspace_files};
-
+/// Gets an entity by ID from the current workspace entity graph.
 pub fn get_entity_by_id(
     workspace_path: &PathBuf,
     entity_type: String,
@@ -45,6 +44,7 @@ pub fn get_entity_by_id(
     Ok(())
 }
 
+/// Gets relatives for an entity by ID from the current workspace entity graph.
 pub fn get_related_entities(
     workspace_path: &PathBuf,
     entity_type: String,
@@ -90,24 +90,7 @@ pub fn get_related_entities(
     }
 }
 
-pub fn list_schemas(workspace_path: &PathBuf, output_format: OutputFormat) -> Result<(), CliError> {
-    ui::header("Listing schemas");
-    let mut workspace = Workspace::new();
-    load_workspace_files(&workspace_path, &mut workspace).map_err(|_| CliError::BuildError)?;
-    let build = build_workspace(workspace).map_err(|_| CliError::BuildError)?;
-
-    ui::success(&format!(
-        "Found {} schemas for this workspace",
-        build.schemas.len()
-    ));
-
-    match output_format {
-        OutputFormat::Pretty => ui::pretty_output_schema_list(&build.schemas.iter().collect()),
-        OutputFormat::Json => ui::json_output(&build.schemas),
-    }
-    Ok(())
-}
-
+/// Lists entities of a given type in the workspace.
 pub fn list_entities_by_type(
     workspace_path: &PathBuf,
     entity_type: String,
@@ -128,5 +111,25 @@ pub fn list_entities_by_type(
         OutputFormat::Json => ui::json_output(&entities),
     }
 
+    Ok(())
+}
+
+/// Lists schemas in the workspace.
+/// This is a special case for the CLI list action where a type of "schema" is provided.
+pub fn list_schemas(workspace_path: &PathBuf, output_format: OutputFormat) -> Result<(), CliError> {
+    ui::header("Listing schemas");
+    let mut workspace = Workspace::new();
+    load_workspace_files(&workspace_path, &mut workspace).map_err(|_| CliError::BuildError)?;
+    let build = build_workspace(workspace).map_err(|_| CliError::BuildError)?;
+
+    ui::success(&format!(
+        "Found {} schemas for this workspace",
+        build.schemas.len()
+    ));
+
+    match output_format {
+        OutputFormat::Pretty => ui::pretty_output_schema_list(&build.schemas.iter().collect()),
+        OutputFormat::Json => ui::json_output(&build.schemas),
+    }
     Ok(())
 }

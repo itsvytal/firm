@@ -1,19 +1,19 @@
 use chrono::{FixedOffset, Local, NaiveTime, TimeZone, Timelike};
 use console::style;
 use convert_case::{Case, Casing};
+use firm_core::{
+    FieldId, FieldType, FieldValue, ReferenceValue, compose_entity_id, graph::EntityGraph,
+};
 use inquire::{Confirm, CustomType, DateSelect, Select, Text, validator::Validation};
 use iso_currency::{Currency, IntoEnumIterator};
 use rust_decimal::Decimal;
 use std::{error::Error, sync::Arc};
 
-use firm_core::{
-    FieldId, FieldType, FieldValue, ReferenceValue, graph::EntityGraph, compose_entity_id,
-};
-
 use crate::errors::CliError;
 
 pub const SKIP_PROMPT_FRAGMENT: &str = " (esc to skip)";
 
+/// Interactive prompt for a field value, applying relevant prompt configurations depending on the field type.
 pub fn prompt_for_field_value(
     field_id: &FieldId,
     field_type: &FieldType,
@@ -38,6 +38,8 @@ pub fn prompt_for_field_value(
     }
 }
 
+/// Prompts for a boolean field.
+/// Value must be true or false.
 fn bool_prompt(skippable: bool, field_id_prompt: &String) -> Result<Option<FieldValue>, CliError> {
     let skip_message = get_skippable_prompt(skippable);
 
@@ -54,6 +56,8 @@ fn bool_prompt(skippable: bool, field_id_prompt: &String) -> Result<Option<Field
     }
 }
 
+/// Prompts for a string field (only single-line supported).
+/// String must not be empty.
 fn string_prompt(
     skippable: bool,
     field_id_prompt: &String,
@@ -67,8 +71,6 @@ fn string_prompt(
                 .prompt_skippable()
                 .map_err(|_| CliError::InputError)?
         } else {
-            // For non-skippable fields, prompt() will always return Some.
-            // Wrap in Some explicitly for type consistency in the match.
             Some(
                 Text::new(&prompt_text)
                     .prompt()
@@ -81,28 +83,17 @@ fn string_prompt(
                 if !v.trim().is_empty() {
                     return Ok(Some(FieldValue::String(v)));
                 } else {
-                    // User entered an empty string (e.g., pressed Enter without typing)
-                    if skippable {
-                        eprintln!(
-                            "{}",
-                            style("This field cannot be empty. Please enter a value or press Esc to skip.").red()
-                        );
-                    } else {
-                        eprintln!(
-                            "{}",
-                            style("This field cannot be empty. Please enter a value.").red()
-                        );
-                    }
-                    // Loop continues to re-prompt
+                    eprintln!(
+                        "{}",
+                        style("This field cannot be empty. Please enter a value.").red()
+                    );
                 }
             }
             None => {
-                // This branch is only reachable if skippable is true and Esc was pressed.
-                // For non-skippable fields, prompt() does not return None.
+                // This branch is only reachable if skippable is true and skip was requested.
                 if skippable {
                     return Ok(None);
                 } else {
-                    // This case should be unreachable given the behavior of Text::prompt()
                     unreachable!("Text::prompt() for a non-skippable field should not return None");
                 }
             }
@@ -110,6 +101,8 @@ fn string_prompt(
     }
 }
 
+/// Prompts for an integer field.
+/// Value must not have a decimal place.
 fn int_prompt(skippable: bool, field_id_prompt: &String) -> Result<Option<FieldValue>, CliError> {
     let skip_message = get_skippable_prompt(skippable);
     let prompt_text = format!("{}{}:", field_id_prompt, skip_message);
@@ -127,6 +120,8 @@ fn int_prompt(skippable: bool, field_id_prompt: &String) -> Result<Option<FieldV
     }
 }
 
+/// Prompts for a float field.
+/// Value must have a decimal place.
 fn float_prompt(skippable: bool, field_id_prompt: &String) -> Result<Option<FieldValue>, CliError> {
     let skip_message = get_skippable_prompt(skippable);
     let prompt_text = format!("{}{}:", field_id_prompt, skip_message);
@@ -144,6 +139,7 @@ fn float_prompt(skippable: bool, field_id_prompt: &String) -> Result<Option<Fiel
     }
 }
 
+/// Wraps currency for use in Inquire custom prompt.
 struct CurrencyOption {
     currency: Currency,
 }
@@ -154,6 +150,8 @@ impl std::fmt::Display for CurrencyOption {
     }
 }
 
+/// Prompts for a currency field.
+/// Currency amount must be a valid number. Currency code is selected from a list of valid options.
 fn currency_prompt(
     skippable: bool,
     field_id_prompt: &String,
@@ -197,6 +195,9 @@ fn currency_prompt(
     }))
 }
 
+/// Prompt for a reference field.
+/// Reference must be to an existing entity or field in the graph.
+/// Auto-complete is provided based on entities in the current graph.
 fn reference_prompt(
     skippable: bool,
     field_id_prompt: &String,
@@ -242,6 +243,7 @@ fn reference_prompt(
     }
 }
 
+/// Parses a string reference by decomposing it and checking the graph if it exists.
 fn parse_reference(
     input: &str,
     graph: &EntityGraph,
@@ -284,6 +286,7 @@ fn parse_reference(
     }
 }
 
+/// Gets suggestions for the reference prompt by searching the graph for partial matches.
 fn get_reference_suggestions(
     input: &str,
     graph: &EntityGraph,
@@ -336,14 +339,14 @@ fn get_reference_suggestions(
     Ok(suggestions)
 }
 
+/// Prompt for a list field.
+/// Lists must have homogeneous types.
+/// User can select a valid type, then iteratively inputs values to it.
 fn list_prompt(
     skippable: bool,
     field_id_prompt: &String,
     entity_graph: Arc<EntityGraph>,
 ) -> Result<Option<FieldValue>, CliError> {
-    // First check if user wants to create a list (for skippable fields)
-    // If skippable, check if user wants to create a list by allowing Enter to proceed and Esc to skip.
-
     // Ask for the item type
     let item_types = vec![
         FieldType::String,
@@ -379,7 +382,6 @@ fn list_prompt(
     // Collect items until user skips
     let mut items = Vec::new();
     let mut item_index = 1;
-
     loop {
         // Prompt for each item (always treat as skippable so user can skip to finish)
         let item_field_id = FieldId::new(&format!("item_{}", item_index));
@@ -399,6 +401,8 @@ fn list_prompt(
     Ok(Some(FieldValue::List(items)))
 }
 
+/// Prompts for a date field.
+/// We do in 3 steps, first a calendar, then time, then UTC offset.
 fn date_prompt(skippable: bool, field_id_prompt: &String) -> Result<Option<FieldValue>, CliError> {
     let skip_message = get_skippable_prompt(skippable);
 
@@ -488,6 +492,7 @@ fn date_prompt(skippable: bool, field_id_prompt: &String) -> Result<Option<Field
     Ok(Some(FieldValue::DateTime(datetime)))
 }
 
+/// Helper to get a prompt message fragment or empty string depending on whether field is skippable.
 fn get_skippable_prompt(skippable: bool) -> &'static str {
     if skippable { SKIP_PROMPT_FRAGMENT } else { "" }
 }

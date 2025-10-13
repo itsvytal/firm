@@ -1,12 +1,12 @@
-use std::path::PathBuf;
-
 use firm_core::graph::{EntityGraph, GraphError};
 use firm_lang::workspace::{Workspace, WorkspaceBuild, WorkspaceError};
+use std::path::PathBuf;
 
 use crate::errors::CliError;
 use crate::files::save_graph_with_backup;
 use crate::ui::{self};
 
+/// Builds the selected workspace and saves the resulting entity graph.
 pub fn build_and_save_graph(workspace_path: &PathBuf) -> Result<(), CliError> {
     ui::header("Building graph");
 
@@ -24,6 +24,7 @@ pub fn build_and_save_graph(workspace_path: &PathBuf) -> Result<(), CliError> {
     Ok(())
 }
 
+/// Loads files in the workspace with progress indicator.
 pub fn load_workspace_files(
     path: &PathBuf,
     workspace: &mut Workspace,
@@ -44,6 +45,7 @@ pub fn load_workspace_files(
     }
 }
 
+/// Builds a workspace with progress indicator.
 pub fn build_workspace(mut workspace: Workspace) -> Result<WorkspaceBuild, WorkspaceError> {
     let progress = ui::progress_bar(workspace.num_files().try_into().unwrap());
 
@@ -64,6 +66,7 @@ pub fn build_workspace(mut workspace: Workspace) -> Result<WorkspaceBuild, Works
     }
 }
 
+/// Builds the entity graph from a workspace with progress indicator.
 pub fn build_graph(build: &WorkspaceBuild) -> Result<EntityGraph, CliError> {
     let spinner = ui::spinner("Creating graph from workspace");
     let mut graph = EntityGraph::new();
