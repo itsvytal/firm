@@ -14,10 +14,13 @@ Firm lets you define your business entities (people, organizations, projects, ta
 The Firm CLI is available to download via Github Releases. Install scripts are provided for desktop platforms to make that process easy.
 
 ### Linux and macOS
-Run the following command to download and run the install script:
-
 ```bash
 curl -fsSL https://raw.githubusercontent.com/42futures/firm/main/install.sh | sudo bash
+```
+
+### Windows
+```powershell
+irm https://raw.githubusercontent.com/42futures/firm/main/install.ps1 | iex
 ```
 
 ## Getting started
