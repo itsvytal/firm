@@ -10,6 +10,14 @@ Firm lets you define your business entities (people, organizations, projects, ta
 - **Rich relationships:** Link strategies, customers, projects, and tasks.
 - **Automatable:** Hook into the workspace using the Firm CLI or Rust package.
 
+## Installation
+The Firm CLI is available to download via Github Releases. Install scripts are provided for desktop platforms to make that process easy.
+
+### Linux and macOS
+```bash
+curl -fsSL https://raw.githubusercontent.com/42futures/firm/main/install.sh | sudo bash
+```
+
 ## Getting started
 Firm operates on a "workspace", which is a directory containing all your `.firm` DSL files. The Firm CLI processes every file in this workspace to build a unified, queryable graph of your business.
 
