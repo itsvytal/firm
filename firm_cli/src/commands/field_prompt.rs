@@ -6,8 +6,13 @@ use firm_core::{
 };
 use inquire::{Confirm, CustomType, DateSelect, Select, Text, validator::Validation};
 use iso_currency::{Currency, IntoEnumIterator};
+use pathdiff::diff_paths;
 use rust_decimal::Decimal;
-use std::{error::Error, sync::Arc};
+use std::{
+    error::Error,
+    path::{Path, PathBuf},
+    sync::Arc,
+};
 
 use crate::errors::CliError;
 
@@ -19,6 +24,8 @@ pub fn prompt_for_field_value(
     field_type: &FieldType,
     is_required: bool,
     entity_graph: Arc<EntityGraph>,
+    source_path: &PathBuf,
+    workspace_dir: &PathBuf,
 ) -> Result<Option<FieldValue>, CliError> {
     let skippable = !is_required;
     let field_id_prompt = field_id.as_str().to_case(Case::Sentence);
@@ -32,9 +39,20 @@ pub fn prompt_for_field_value(
         FieldType::Reference => {
             reference_prompt(skippable, &field_id_prompt, Arc::clone(&entity_graph))
         }
-        FieldType::List => list_prompt(skippable, &field_id_prompt, Arc::clone(&entity_graph)),
+        FieldType::List => list_prompt(
+            skippable,
+            &field_id_prompt,
+            Arc::clone(&entity_graph),
+            source_path,
+            workspace_dir,
+        ),
         FieldType::DateTime => date_prompt(skippable, &field_id_prompt),
-        FieldType::Path => todo!(),
+        FieldType::Path => path_prompt(
+            skippable,
+            &field_id_prompt,
+            source_path,
+            workspace_dir.clone(),
+        ),
     }
 }
 
@@ -346,6 +364,8 @@ fn list_prompt(
     skippable: bool,
     field_id_prompt: &String,
     entity_graph: Arc<EntityGraph>,
+    source_path: &PathBuf,
+    workspace_dir: &PathBuf,
 ) -> Result<Option<FieldValue>, CliError> {
     // Ask for the item type
     let item_types = vec![
@@ -385,8 +405,14 @@ fn list_prompt(
     loop {
         // Prompt for each item (always treat as skippable so user can skip to finish)
         let item_field_id = FieldId::new(&format!("item_{}", item_index));
-        match prompt_for_field_value(&item_field_id, &item_type, false, Arc::clone(&entity_graph))?
-        {
+        match prompt_for_field_value(
+            &item_field_id,
+            &item_type,
+            false,
+            Arc::clone(&entity_graph),
+            source_path,
+            workspace_dir,
+        )? {
             Some(value) => {
                 items.push(value);
                 item_index += 1;
@@ -490,6 +516,89 @@ fn date_prompt(skippable: bool, field_id_prompt: &String) -> Result<Option<Field
     let datetime = offset.from_local_datetime(&naive_datetime).unwrap();
 
     Ok(Some(FieldValue::DateTime(datetime)))
+}
+
+/// Prompts for a path field.
+fn path_prompt(
+    skippable: bool,
+    field_id_prompt: &String,
+    source_path: &PathBuf,
+    workspace_dir: PathBuf,
+) -> Result<Option<FieldValue>, CliError> {
+    let skip_message = get_skippable_prompt(skippable);
+    let prompt_text = format!("{}{}:", field_id_prompt, skip_message);
+
+    let autocomplete_workspace = workspace_dir.clone();
+    let autocomplete =
+        move |input: &str| get_path_suggestions(input, autocomplete_workspace.clone());
+    let reference_value_prompt = Text::new(&prompt_text)
+        .with_help_message("Start typing the path for autocompletion")
+        .with_autocomplete(autocomplete);
+
+    let result_str = if skippable {
+        let result = reference_value_prompt
+            .prompt_skippable()
+            .map_err(|_| CliError::InputError)?;
+
+        match result {
+            Some(val) => val,
+            None => return Ok(None),
+        }
+    } else {
+        reference_value_prompt
+            .prompt()
+            .map_err(|_| CliError::InputError)?
+    };
+
+    // Transform the workspace-relative path to the source-file relative path
+    let full_path = workspace_dir.join(&result_str);
+    let source_dir = source_path.parent().unwrap_or(Path::new(""));
+    let relative_path =
+        diff_paths(&full_path, source_dir).unwrap_or_else(|| PathBuf::from(&result_str));
+
+    Ok(Some(FieldValue::Path(relative_path)))
+}
+
+fn get_path_suggestions(
+    input: &str,
+    workspace_dir: PathBuf,
+) -> Result<Vec<String>, Box<dyn Error + Send + Sync>> {
+    let input_path = Path::new(input);
+    let search_dir = if input.ends_with('/') || input.is_empty() {
+        workspace_dir.join(input_path)
+    } else {
+        workspace_dir
+            .join(input_path)
+            .parent()
+            .unwrap_or(&workspace_dir)
+            .to_path_buf()
+    };
+
+    let mut suggestions = Vec::new();
+    if let Ok(entries) = std::fs::read_dir(search_dir) {
+        for entry in entries.flatten() {
+            let full_path = entry.path();
+
+            // Get the path relative to the current workspace directory
+            if let Some(relative_path) = diff_paths(&full_path, &workspace_dir) {
+                let mut suggestion = relative_path.to_string_lossy().to_string();
+
+                // Add a trailing slash to directories for clairty
+                if let Ok(file_type) = entry.file_type() {
+                    if file_type.is_dir() {
+                        suggestion.push('/');
+                    }
+                }
+
+                // Add the suggestion if it starts with the user's input
+                if suggestion.starts_with(input) {
+                    suggestions.push(suggestion);
+                }
+            }
+        }
+    }
+
+    Ok(suggestions)
 }
 
 /// Helper to get a prompt message fragment or empty string depending on whether field is skippable.

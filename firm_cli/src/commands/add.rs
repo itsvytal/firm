@@ -58,7 +58,14 @@ pub fn add_entity(
     // Create initial entity and collect required fields
     let mut entity = Entity::new(entity_id.into(), chosen_schema.entity_type.to_owned());
     let arc_graph = Arc::new(graph.clone());
-    entity = prompt_required_fields(&chosen_schema, entity.clone(), &arc_graph)?;
+    let generated_file_path = compute_dsl_path(workspace_path, to_file, chosen_type_str);
+    entity = prompt_required_fields(
+        &chosen_schema,
+        entity.clone(),
+        &arc_graph,
+        &generated_file_path,
+        workspace_path,
+    )?;
 
     // If user chooses to add optionals, prompt for each optional field
     let add_optional = Confirm::new("Add optional fields?")
@@ -67,12 +74,17 @@ pub fn add_entity(
         .map_err(|_| CliError::InputError)?;
 
     if add_optional {
-        entity = prompt_optional_fields(chosen_schema.clone(), entity.clone(), arc_graph)?;
+        entity = prompt_optional_fields(
+            chosen_schema.clone(),
+            entity.clone(),
+            arc_graph,
+            &generated_file_path,
+            workspace_path,
+        )?;
     }
 
     // Generate and write the resulting DSL
     let generated_dsl = generate_dsl(&[entity.clone()]);
-    let generated_file_path = compute_dsl_path(workspace_path, to_file, chosen_type_str);
 
     ui::info(&format!(
         "Writing generated DSL to file {}",
@@ -87,6 +99,8 @@ fn prompt_required_fields(
     chosen_schema: &EntitySchema,
     mut entity: Entity,
     arc_graph: &Arc<EntityGraph>,
+    source_path: &PathBuf,
+    workspace_path: &PathBuf,
 ) -> Result<Entity, CliError> {
     let mut required_fields: Vec<_> = chosen_schema
         .fields
@@ -101,6 +115,8 @@ fn prompt_required_fields(
             field.expected_type(),
             field.is_required(),
             Arc::clone(arc_graph),
+            source_path,
+            workspace_path,
         )? {
             Some(value) => {
                 entity = entity.with_field(field_id.clone(), value);
@@ -117,6 +133,8 @@ fn prompt_optional_fields(
     chosen_schema: EntitySchema,
     mut entity: Entity,
     graph: Arc<EntityGraph>,
+    source_path: &PathBuf,
+    workspace_path: &PathBuf,
 ) -> Result<Entity, CliError> {
     let mut optional_fields: Vec<_> = chosen_schema
         .fields
@@ -131,6 +149,8 @@ fn prompt_optional_fields(
             field.expected_type(),
             field.is_required(),
             Arc::clone(&graph),
+            source_path,
+            workspace_path,
         )? {
             Some(value) => {
                 entity = entity.with_field(field_id.clone(), value);
