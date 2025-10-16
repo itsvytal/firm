@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use tree_sitter::Node;
 
 use super::{
@@ -16,12 +18,13 @@ const NESTED_BLOCK_KIND: &str = "nested_block";
 pub struct ParsedSchema<'a> {
     node: Node<'a>,
     source: &'a str,
+    path: &'a PathBuf,
 }
 
 impl<'a> ParsedSchema<'a> {
     /// Creates a new ParsedSchema from a tree-sitter node and source text.
-    pub fn new(node: Node<'a>, source: &'a str) -> Self {
-        Self { node, source }
+    pub fn new(node: Node<'a>, source: &'a str, path: &'a PathBuf) -> Self {
+        Self { node, source, path }
     }
 
     /// Gets the schema name (e.g., "project", "invoice").
@@ -54,7 +57,7 @@ impl<'a> ParsedSchema<'a> {
                     {
                         let block_type = get_node_text(&block_type_node, self.source);
                         if block_type == "field" {
-                            fields.push(ParsedSchemaField::new(child, self.source));
+                            fields.push(ParsedSchemaField::new(child, self.source, self.path));
                         }
                     }
                 }

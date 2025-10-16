@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use tree_sitter::Node;
 
 use super::{
@@ -21,12 +22,13 @@ const BLOCK_KIND: &str = "block";
 pub struct ParsedSchemaField<'a> {
     node: Node<'a>,
     source: &'a str,
+    path: &'a PathBuf,
 }
 
 impl<'a> ParsedSchemaField<'a> {
     /// Creates a new ParsedSchemaField from a tree-sitter node and source text.
-    pub fn new(node: Node<'a>, source: &'a str) -> Self {
-        Self { node, source }
+    pub fn new(node: Node<'a>, source: &'a str, path: &'a PathBuf) -> Self {
+        Self { node, source, path }
     }
 
     /// Gets the field name from the "name" field.
@@ -74,7 +76,7 @@ impl<'a> ParsedSchemaField<'a> {
         // Look for field assignments within the block
         for child in block_node.children(&mut cursor) {
             if child.kind() == FIELD_KIND {
-                let field = super::ParsedField::new(child, self.source);
+                let field = super::ParsedField::new(child, self.source, self.path);
                 if let Some(id) = field.id() {
                     if id == field_name {
                         return Some(field);

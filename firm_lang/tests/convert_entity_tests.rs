@@ -1,5 +1,5 @@
 use chrono::{Datelike, Timelike};
-use firm_core::{Entity, EntityId, FieldId, FieldValue, EntityType};
+use firm_core::{Entity, EntityId, EntityType, FieldId, FieldValue};
 use firm_lang::parser::parse_source;
 use iso_currency::Currency;
 use rust_decimal::Decimal;
@@ -7,8 +7,8 @@ use rust_decimal::Decimal;
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::path::PathBuf;
     use firm_core::ReferenceValue;
+    use std::path::PathBuf;
 
     #[test]
     fn test_basic_entity_conversion() {
@@ -20,7 +20,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
@@ -51,7 +51,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
@@ -69,15 +69,12 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
         assert_eq!(entity.id, EntityId("project.alpha_project".to_string()));
-        assert_eq!(
-            entity.entity_type,
-            EntityType::new("project")
-        );
+        assert_eq!(entity.entity_type, EntityType::new("project"));
     }
 
     #[test]
@@ -93,7 +90,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
@@ -114,7 +111,7 @@ mod tests {
     fn test_numeric_field_conversion() {
         let source = r#"test_entity numeric_test { integer_field = 42, float_field = 3.14159 }"#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
@@ -137,7 +134,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
@@ -160,7 +157,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
@@ -189,7 +186,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
@@ -216,7 +213,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
@@ -246,7 +243,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
@@ -277,7 +274,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
@@ -296,7 +293,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
@@ -321,7 +318,7 @@ mod tests {
         // If not, it will test string conversion instead
         let source = r#"event meeting { start_time = "2024-03-15T14:30:00-05:00" }"#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
@@ -349,7 +346,7 @@ mod tests {
     }
 
     #[test]
-    fn test_path_field_conversion() {
+    fn test_path_field_no_source_conversion() {
         let source = r#"
             test_entity path_test {
                 relative_path = path"./my/path.txt"
@@ -357,7 +354,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
@@ -372,6 +369,91 @@ mod tests {
     }
 
     #[test]
+    fn test_path_field_subdir_source_conversion() {
+        let source = r#"
+            test_entity path_test {
+                relative_path = path"./my/path.txt"
+            }
+        "#;
+
+        let parsed = parse_source(
+            String::from(source),
+            Some(PathBuf::from("./subdir/source.firm")),
+        )
+        .unwrap();
+        let entities = parsed.entities();
+        let entity: Entity = (&entities[0]).try_into().unwrap();
+
+        assert_eq!(
+            entity.fields[&FieldId("relative_path".to_string())],
+            FieldValue::Path(PathBuf::from("./subdir/my/path.txt"))
+        );
+    }
+
+    #[test]
+    fn test_path_field_root_source_conversion() {
+        let source = r#"
+            test_entity path_test {
+                relative_path = path"./my/path.txt"
+            }
+        "#;
+
+        let parsed =
+            parse_source(String::from(source), Some(PathBuf::from("./source.firm"))).unwrap();
+        let entities = parsed.entities();
+        let entity: Entity = (&entities[0]).try_into().unwrap();
+
+        assert_eq!(
+            entity.fields[&FieldId("relative_path".to_string())],
+            FieldValue::Path(PathBuf::from("./my/path.txt"))
+        );
+    }
+
+    #[test]
+    fn test_path_field_parent_dir_source_conversion() {
+        let source = r#"
+            test_entity path_test {
+                relative_path = path"../sibling/path.txt"
+            }
+        "#;
+
+        let parsed = parse_source(
+            String::from(source),
+            Some(PathBuf::from("./subdir/source.firm")),
+        )
+        .unwrap();
+        let entities = parsed.entities();
+        let entity: Entity = (&entities[0]).try_into().unwrap();
+
+        assert_eq!(
+            entity.fields[&FieldId("relative_path".to_string())],
+            FieldValue::Path(PathBuf::from("./sibling/path.txt"))
+        );
+    }
+
+    #[test]
+    fn test_path_field_outside_workspace_conversion() {
+        let source = r#"
+            test_entity path_test {
+                relative_path = path"../../path.txt"
+            }
+        "#;
+
+        let parsed = parse_source(
+            String::from(source),
+            Some(PathBuf::from("./subdir/source.firm")),
+        )
+        .unwrap();
+        let entities = parsed.entities();
+        let entity: Entity = (&entities[0]).try_into().unwrap();
+
+        assert_eq!(
+            entity.fields[&FieldId("relative_path".to_string())],
+            FieldValue::Path(PathBuf::from("../path.txt"))
+        );
+    }
+
+    #[test]
     fn test_multiple_entities_conversion() {
         let source = r#"
             person john_doe {
@@ -382,7 +464,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
 
         assert_eq!(entities.len(), 2);
@@ -404,7 +486,7 @@ mod tests {
             organization john_doe { name = "John's Company" }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
 
         let entity1: Entity = (&entities[0]).try_into().unwrap();
@@ -422,7 +504,7 @@ mod tests {
             Person jane_doe { name = "Jane" }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
 
         let entity1: Entity = (&entities[0]).try_into().unwrap();
@@ -451,15 +533,12 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
         assert_eq!(entity.id, EntityId("contract.main_contract".to_string()));
-        assert_eq!(
-            entity.entity_type,
-            EntityType::new("contract")
-        );
+        assert_eq!(entity.entity_type, EntityType::new("contract"));
         assert_eq!(entity.fields.len(), 7);
 
         // Verify each field type conversion

@@ -1,5 +1,6 @@
 use chrono::{DateTime, FixedOffset, Local, NaiveDate, NaiveTime, Offset, TimeZone};
 use iso_currency::Currency;
+use path_clean::PathClean;
 use rust_decimal::Decimal;
 use std::path::PathBuf;
 use tree_sitter::Node;
@@ -93,7 +94,11 @@ impl ParsedValue {
     }
 
     /// Parses a value from a tree-sitter node with type conversion.
-    pub fn from_node<'a>(node: Node<'a>, source: &'a str) -> Result<ParsedValue, ValueParseError> {
+    pub fn from_node<'a>(
+        node: Node<'a>,
+        source: &'a str,
+        path: &'a PathBuf,
+    ) -> Result<ParsedValue, ValueParseError> {
         let kind = Self::get_value_kind(node).ok_or(ValueParseError::UnknownValueKind)?;
         let raw = get_node_text(&node, source);
 
@@ -103,10 +108,10 @@ impl ParsedValue {
             ValueKind::Number => Self::parse_number(&raw),
             ValueKind::Currency => Self::parse_currency(&raw),
             ValueKind::Reference => Self::parse_reference(&raw),
-            ValueKind::List => Self::parse_list(node, source),
+            ValueKind::List => Self::parse_list(node, source, path),
             ValueKind::Date => Self::parse_date(&raw),
             ValueKind::DateTime => Self::parse_datetime(&raw),
-            ValueKind::Path => Self::parse_path(&raw),
+            ValueKind::Path => Self::parse_path(&raw, path),
             _ => Err(ValueParseError::MissingParseMethod),
         }
     }
@@ -207,7 +212,11 @@ impl ParsedValue {
 
     /// Parses list values by recursively parsing each contained value.
     /// Ensures all list items are of the same type (homogeneous lists).
-    fn parse_list<'a>(node: Node<'a>, source: &'a str) -> Result<ParsedValue, ValueParseError> {
+    fn parse_list<'a>(
+        node: Node<'a>,
+        source: &'a str,
+        path: &'a PathBuf,
+    ) -> Result<ParsedValue, ValueParseError> {
         // For lists, we walk each child value node and parse it
         let mut items: Vec<ParsedValue> = Vec::new();
         let mut cursor = node.walk();
@@ -220,7 +229,7 @@ impl ParsedValue {
             for child in list_node.children(&mut list_cursor) {
                 if child.kind() == VALUE_KIND {
                     // Recursively parse the list child value
-                    let item = Self::from_node(child, source)?;
+                    let item = Self::from_node(child, source, path)?;
 
                     // Check type homogeneity
                     let item_type = item.get_type_name();
@@ -309,11 +318,32 @@ impl ParsedValue {
     }
 
     /// Parses file path values.
-    /// TODO: We need to make these relative to the workspace.
-    fn parse_path(raw: &str) -> Result<ParsedValue, ValueParseError> {
+    ///
+    /// Relative paths are assumed to be relative to the source file they're defined in.
+    /// On parse, we transform the source-relative path to a workspace-relative path and normalize it.
+    /// Absolute paths are left as-is.
+    fn parse_path(raw: &str, source_path: &PathBuf) -> Result<ParsedValue, ValueParseError> {
         let raw_path = raw.replace("path\"", "").trim_matches('"').to_string();
-        let path = PathBuf::from(raw_path);
-        Ok(ParsedValue::Path(path))
+        let target_path = PathBuf::from(raw_path);
+
+        // Transform the target path to the source path's parent directory
+        let combined_path = if target_path.is_absolute() {
+            target_path
+        } else if let Some(source_dir) = source_path.parent() {
+            source_dir.join(&target_path)
+        } else {
+            target_path
+        };
+
+        // Clean the path, and prepend ./ for consistency if it's relative
+        let cleaned_path = combined_path.clean();
+        let final_path = if cleaned_path.is_relative() && !cleaned_path.starts_with("..") {
+            PathBuf::from("./").join(cleaned_path)
+        } else {
+            cleaned_path
+        };
+
+        Ok(ParsedValue::Path(final_path))
     }
 
     /// Removes common leading whitespace from multi-line strings.

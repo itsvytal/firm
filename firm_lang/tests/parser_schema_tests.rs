@@ -20,7 +20,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(source.to_string()).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(!parsed.has_error());
 
         let schemas = parsed.schemas();
@@ -95,7 +95,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(source.to_string()).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(!parsed.has_error());
 
         let schemas = parsed.schemas();
@@ -192,7 +192,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(source.to_string()).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(!parsed.has_error());
 
         let schemas = parsed.schemas();
@@ -243,7 +243,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(source.to_string()).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(!parsed.has_error());
 
         let schemas = parsed.schemas();
@@ -264,7 +264,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(source.to_string()).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(!parsed.has_error());
 
         let schemas = parsed.schemas();
@@ -304,7 +304,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(source.to_string()).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(!parsed.has_error());
 
         let schemas = parsed.schemas();
@@ -338,7 +338,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(source.to_string()).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(!parsed.has_error()); // Tree-sitter parses successfully
 
         let schemas = parsed.schemas();
@@ -384,7 +384,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(source.to_string()).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(!parsed.has_error());
 
         let schemas = parsed.schemas();

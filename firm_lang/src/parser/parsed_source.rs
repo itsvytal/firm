@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use tree_sitter::Tree;
 
 use super::{ParsedEntity, ParsedSchema};
@@ -11,14 +13,20 @@ const SCHEMA_BLOCK_KIND: &str = "schema_block";
 /// providing access to entities and syntax error detection.
 #[derive(Debug)]
 pub struct ParsedSource {
+    /// The plain text source file.
     pub source: String,
+
+    /// The parsed syntax tree.
     pub tree: Tree,
+
+    /// The workspace-relative path to this source file.
+    pub path: PathBuf,
 }
 
 impl ParsedSource {
     /// Creates a new ParsedSource from source text and parse tree.
-    pub fn new(source: String, tree: Tree) -> Self {
-        Self { source, tree }
+    pub fn new(source: String, tree: Tree, path: PathBuf) -> Self {
+        Self { source, tree, path }
     }
 
     /// Check if the source contains syntax errors.
@@ -34,7 +42,7 @@ impl ParsedSource {
 
         for child in root.children(&mut cursor) {
             if child.kind() == ENTITY_BLOCK_KIND {
-                entities.push(ParsedEntity::new(child, &self.source));
+                entities.push(ParsedEntity::new(child, &self.source, &self.path));
             }
         }
 
@@ -49,7 +57,7 @@ impl ParsedSource {
 
         for child in root.children(&mut cursor) {
             if child.kind() == SCHEMA_BLOCK_KIND {
-                schemas.push(ParsedSchema::new(child, &self.source));
+                schemas.push(ParsedSchema::new(child, &self.source, &self.path));
             }
         }
 
@@ -59,6 +67,8 @@ impl ParsedSource {
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
     use crate::parser::parse_source;
 
     #[test]
@@ -75,7 +85,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
 
         assert!(!parsed.has_error());
 
@@ -105,7 +115,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
 
         assert!(!parsed.has_error());
 
@@ -147,7 +157,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(!parsed.has_error());
     }
 
@@ -161,7 +171,7 @@ mod tests {
                 // Entity block is incomplete...
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 
@@ -173,7 +183,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 
@@ -185,7 +195,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 
@@ -197,7 +207,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 
@@ -209,7 +219,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 
@@ -221,7 +231,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 
@@ -262,7 +272,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(!parsed.has_error());
 
         let schemas = parsed.schemas();
@@ -297,5 +307,18 @@ mod tests {
         assert_eq!(description_field.name().unwrap(), "description");
         assert_eq!(description_field.field_type().unwrap(), "string");
         assert_eq!(description_field.required(), false);
+    }
+
+    #[test]
+    fn test_passes_default_path() {
+        let parsed = parse_source(String::new(), None).unwrap();
+        assert!(parsed.path == PathBuf::new());
+    }
+
+    #[test]
+    fn test_passes_custom_path() {
+        let path = PathBuf::from("./subdirectory/file.firm");
+        let parsed = parse_source(String::new(), Some(path.clone())).unwrap();
+        assert_eq!(parsed.path, path);
     }
 }

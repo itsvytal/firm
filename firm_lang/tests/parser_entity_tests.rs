@@ -13,7 +13,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
 
         assert_eq!(entities.len(), 1);
@@ -32,7 +32,7 @@ mod tests {
             }
             """
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
         let field = &fields[0];
@@ -50,7 +50,7 @@ mod tests {
     #[test]
     fn test_multiline_string_single_line() {
         let source = r#"contact test { note = """Just one line""" }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
         let field = &fields[0];
@@ -71,7 +71,7 @@ mod tests {
             Second paragraph after empty line
             """
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
         let field = &fields[0];
@@ -94,7 +94,7 @@ mod tests {
             Based in San Francisco
             """
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -113,7 +113,7 @@ mod tests {
     #[test]
     fn test_number_fields() {
         let source = r#"contact test { age = 42, height = 5.9 }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
 
         assert_eq!(
             parsed.entities()[0].fields()[0].value(),
@@ -128,7 +128,7 @@ mod tests {
     #[test]
     fn test_boolean_fields() {
         let source = r#"contact test { active = true, verified = false }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
 
         assert_eq!(
             parsed.entities()[0].fields()[0].value(),
@@ -146,7 +146,7 @@ mod tests {
             salary = 75000.50 USD
             bonus = 5000.00 EUR
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -170,7 +170,7 @@ mod tests {
             salary = 50000 USD
             budget = 1000 DKK
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -198,7 +198,7 @@ mod tests {
             contingency = 19999.25 USD
         }"#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         assert_eq!(entities.len(), 1);
 
@@ -224,7 +224,7 @@ mod tests {
             manager = contact.john_doe
             company = organization.acme_corp
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -250,7 +250,7 @@ mod tests {
             title = contact.john_doe.title
             department = organization.acme_corp.department
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -279,7 +279,7 @@ mod tests {
             scores = [85, 92, 78]
             flags = [true, false, true]
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -312,7 +312,7 @@ mod tests {
     #[test]
     fn test_empty_lists() {
         let source = r#"contact test { tags = [] }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
 
         assert_eq!(
             parsed.entities()[0].fields()[0].value(),
@@ -325,7 +325,7 @@ mod tests {
         let source = r#"contact test {
             matrix = [[1, 2, 3], [4, 5, 6]]
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -352,7 +352,7 @@ mod tests {
             birthday = 1990-05-15
             start_date = 2023-01-01
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -383,7 +383,7 @@ mod tests {
             review_date = 2024-01-15
         }"#;
 
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         assert_eq!(entities.len(), 1);
 
@@ -402,7 +402,7 @@ mod tests {
             meeting = 2025-01-15 at 14:30 UTC+2
             deadline = 2025-02-28 at 23:59 UTC-5
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -434,7 +434,7 @@ mod tests {
         let source = r#"contact test {
             meeting = 2025-01-15 at 9:30
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -454,7 +454,7 @@ mod tests {
         let source = r#"contact test {
             meeting = 2025-01-15 at 14:30 UTC-7
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -470,7 +470,7 @@ mod tests {
         let source = r#"contact test {
             meeting = 2025-01-15 at 14:30 UTC+3
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -486,7 +486,7 @@ mod tests {
         let source = r#"contact test {
             meeting = 2025-01-15 at 14:30 UTC
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -502,7 +502,7 @@ mod tests {
         let source = r#"contact test {
             mixed = ["string", 42]
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -517,35 +517,35 @@ mod tests {
     #[test]
     fn test_invalid_boolean_error() {
         let source = r#"contact test { flag = maybe }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 
     #[test]
     fn test_invalid_integer_error() {
         let source = r#"contact test { age = 42abc }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 
     #[test]
     fn test_invalid_float_error() {
         let source = r#"contact test { height = 5.9.2 }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 
     #[test]
     fn test_invalid_currency_format_error() {
         let source = r#"contact test { salary = 50000USD }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 
     #[test]
     fn test_invalid_currency_amount_error() {
         let source = r#"contact test { salary = abc USD }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 
@@ -555,14 +555,14 @@ mod tests {
             salary = 50000 DOLLARS
             bonus = 5000 US
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 
     #[test]
     fn test_invalid_reference_format_error() {
         let source = r#"contact test { ref = contact.too.many.parts.here }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 
@@ -572,7 +572,7 @@ mod tests {
             bad_date1 = 2023-13-01
             bad_date2 = 2023-02-30
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -586,7 +586,7 @@ mod tests {
             bad_datetime1 = 2023-13-01 at 14:30
             bad_datetime2 = 2023-01-01 at 25:30
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 
@@ -599,7 +599,7 @@ mod tests {
         let source = r#"contact test {
             bad_tz = 2023-01-01 at 14:30 UTC+25
         }"#;
-        let parsed = parse_source(String::from(source)).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         let entities = parsed.entities();
         let fields = entities[0].fields();
 

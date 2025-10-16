@@ -13,7 +13,7 @@ mod tests {
         let mut workspace = Workspace::new();
         let path = PathBuf::from("../example/core/main.firm");
 
-        let result = workspace.load_file(&path);
+        let result = workspace.load_file(&path, &PathBuf::from("../example"));
         assert!(result.is_ok(), "Should load example file successfully");
     }
 
@@ -22,7 +22,7 @@ mod tests {
         let mut workspace = Workspace::new();
         let path = PathBuf::from("nonexistent.firm");
 
-        let result = workspace.load_file(&path);
+        let result = workspace.load_file(&path, &PathBuf::new());
         assert!(result.is_err(), "Should fail to load nonexistent file");
 
         match result {
@@ -84,7 +84,7 @@ organization acme {
 
         let mut workspace = Workspace::new();
         workspace
-            .load_file(&mixed_file_path)
+            .load_file(&mixed_file_path, &PathBuf::new())
             .expect("Should load file");
 
         let result = workspace.build();
@@ -115,7 +115,7 @@ person john {
 
         let mut workspace = Workspace::new();
         workspace
-            .load_file(&invalid_file_path)
+            .load_file(&invalid_file_path, &PathBuf::new())
             .expect("Should load file");
 
         let result = workspace.build();
@@ -146,7 +146,7 @@ custom_unknown john {
 
         let mut workspace = Workspace::new();
         workspace
-            .load_file(&custom_file_path)
+            .load_file(&custom_file_path, &PathBuf::new())
             .expect("Should load file");
 
         let result = workspace.build();
@@ -194,7 +194,7 @@ custom_employee emp1 {
 
         let mut workspace = Workspace::new();
         workspace
-            .load_file(&schema_and_entity_file)
+            .load_file(&schema_and_entity_file, &PathBuf::new())
             .expect("Should load file");
 
         let result = workspace.build();
@@ -228,7 +228,7 @@ person broken_person {
 
         let mut workspace = Workspace::new();
         workspace
-            .load_file(&invalid_file_path)
+            .load_file(&invalid_file_path, &PathBuf::new())
             .expect("Should load file");
 
         let result = workspace.build();
@@ -256,7 +256,7 @@ schema broken_schema {
 
         let mut workspace = Workspace::new();
         workspace
-            .load_file(&invalid_schema_file)
+            .load_file(&invalid_schema_file, &PathBuf::new())
             .expect("Should load file");
 
         let result = workspace.build();
@@ -306,7 +306,7 @@ organization globo {
 
         let mut workspace = Workspace::new();
         workspace
-            .load_file(&entities_file)
+            .load_file(&entities_file, &PathBuf::new())
             .expect("Should load file");
 
         let result = workspace.build();
