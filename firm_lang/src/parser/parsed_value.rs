@@ -318,6 +318,10 @@ impl ParsedValue {
     }
 
     /// Parses file path values.
+    ///
+    /// Relative paths are assumed to be relative to the source file they're defined in.
+    /// On parse, we transform the source-relative path to a workspace-relative path and normalize it.
+    /// Absolute paths are left as-is.
     fn parse_path(raw: &str, source_path: &PathBuf) -> Result<ParsedValue, ValueParseError> {
         let raw_path = raw.replace("path\"", "").trim_matches('"').to_string();
         let target_path = PathBuf::from(raw_path);
@@ -331,7 +335,7 @@ impl ParsedValue {
             target_path
         };
 
-        // Clean the path, and prepend ./ if it's relative and doesn't have it
+        // Clean the path, and prepend ./ for consistency if it's relative
         let cleaned_path = combined_path.clean();
         let final_path = if cleaned_path.is_relative() && !cleaned_path.starts_with("..") {
             PathBuf::from("./").join(cleaned_path)
