@@ -25,8 +25,8 @@ mod tests {
                 let source =
                     fs::read_to_string(&path).expect(&format!("Failed to read file: {}", filename));
 
-                let parsed =
-                    parse_source(source).expect(&format!("Failed to parse file: {}", filename));
+                let parsed = parse_source(source, None)
+                    .expect(&format!("Failed to parse file: {}", filename));
 
                 assert!(
                     !parsed.has_error(),
@@ -73,7 +73,7 @@ mod tests {
             }
         "#;
 
-        let parsed = parse_source(source.to_string()).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(!parsed.has_error());
 
         let entities = parsed.entities();
@@ -96,7 +96,7 @@ mod tests {
     #[test]
     fn test_empty_source() {
         let source = "";
-        let parsed = parse_source(source.to_string()).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(!parsed.has_error());
         assert_eq!(parsed.entities().len(), 0);
         assert_eq!(parsed.schemas().len(), 0);
@@ -111,7 +111,7 @@ mod tests {
             // Another comment
         "#;
 
-        let parsed = parse_source(source.to_string()).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(!parsed.has_error());
         assert_eq!(parsed.entities().len(), 0);
         assert_eq!(parsed.schemas().len(), 0);
@@ -125,7 +125,7 @@ mod tests {
                 // Missing closing brace
         "#;
 
-        let parsed = parse_source(source.to_string()).unwrap();
+        let parsed = parse_source(String::from(source), None).unwrap();
         assert!(parsed.has_error());
     }
 }

@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use tree_sitter::Node;
 
 use super::{
@@ -16,12 +18,13 @@ const VALUE_KIND: &str = "value";
 pub struct ParsedField<'a> {
     node: Node<'a>,
     source: &'a str,
+    path: &'a PathBuf,
 }
 
 impl<'a> ParsedField<'a> {
     /// Creates a new ParsedField from a tree-sitter node and source text.
-    pub fn new(node: Node<'a>, source: &'a str) -> Self {
-        Self { node, source }
+    pub fn new(node: Node<'a>, source: &'a str, path: &'a PathBuf) -> Self {
+        Self { node, source, path }
     }
 
     /// Gets the field name (e.g., "name", "age").
@@ -35,6 +38,6 @@ impl<'a> ParsedField<'a> {
         let value_node =
             find_child_of_kind(&self.node, VALUE_KIND).ok_or(ValueParseError::MissingValue)?;
 
-        ParsedValue::from_node(value_node, self.source)
+        ParsedValue::from_node(value_node, self.source, self.path)
     }
 }

@@ -10,7 +10,7 @@ impl Workspace {
     /// Load a single firm source file.
     pub fn load_file(&mut self, path: &PathBuf) -> Result<(), WorkspaceError> {
         let text = fs::read_to_string(path).map_err(|err| WorkspaceError::IoError(err))?;
-        let parsed = parse_source(text.clone())
+        let parsed = parse_source(text.clone(), Some(path.clone()))
             .map_err(|err| WorkspaceError::ParseError(path.clone(), err.to_string()))?;
 
         self.files.insert(path.clone(), WorkspaceFile::new(parsed));

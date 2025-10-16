@@ -1,6 +1,5 @@
 use firm_core::{
-    FieldId,
-    EntityType,
+    EntityType, FieldId,
     field::FieldType,
     schema::{EntitySchema, FieldSchema},
 };
@@ -25,16 +24,13 @@ fn test_convert_simple_schema() {
         }
     "#;
 
-    let parsed = parse_source(String::from(source)).unwrap();
+    let parsed = parse_source(String::from(source), None).unwrap();
     let schemas = parsed.schemas();
     assert_eq!(schemas.len(), 1);
 
     let schema: EntitySchema = (&schemas[0]).try_into().unwrap();
 
-    assert_eq!(
-        schema.entity_type,
-        EntityType::new("project")
-    );
+    assert_eq!(schema.entity_type, EntityType::new("project"));
     assert_eq!(schema.fields.len(), 2);
 
     // Check required field
@@ -70,16 +66,13 @@ fn test_convert_schema_with_various_types() {
         }
     "#;
 
-    let parsed = parse_source(String::from(source)).unwrap();
+    let parsed = parse_source(String::from(source), None).unwrap();
     let schemas = parsed.schemas();
     assert_eq!(schemas.len(), 1);
 
     let schema: EntitySchema = (&schemas[0]).try_into().unwrap();
 
-    assert_eq!(
-        schema.entity_type,
-        EntityType::new("invoice")
-    );
+    assert_eq!(schema.entity_type, EntityType::new("invoice"));
     assert_eq!(schema.fields.len(), 3);
 
     // Check currency field
@@ -107,7 +100,7 @@ fn test_unknown_field_type_error() {
         }
     "#;
 
-    let parsed = parse_source(String::from(source)).unwrap();
+    let parsed = parse_source(String::from(source), None).unwrap();
     let schemas = parsed.schemas();
     assert_eq!(schemas.len(), 1);
 
@@ -138,7 +131,7 @@ fn test_convert_multiple_schemas() {
         }
     "#;
 
-    let parsed = parse_source(String::from(source)).unwrap();
+    let parsed = parse_source(String::from(source), None).unwrap();
     let schemas = parsed.schemas();
     assert_eq!(schemas.len(), 2);
 
@@ -146,14 +139,8 @@ fn test_convert_multiple_schemas() {
     let project_schema: EntitySchema = (&schemas[0]).try_into().unwrap();
     let invoice_schema: EntitySchema = (&schemas[1]).try_into().unwrap();
 
-    assert_eq!(
-        project_schema.entity_type,
-        EntityType::new("project")
-    );
-    assert_eq!(
-        invoice_schema.entity_type,
-        EntityType::new("invoice")
-    );
+    assert_eq!(project_schema.entity_type, EntityType::new("project"));
+    assert_eq!(invoice_schema.entity_type, EntityType::new("invoice"));
 
     assert_eq!(project_schema.fields.len(), 1);
     assert_eq!(invoice_schema.fields.len(), 1);

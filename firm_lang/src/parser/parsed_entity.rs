@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use tree_sitter::Node;
 
 use super::{
@@ -17,12 +19,13 @@ const FIELD_KIND: &str = "field";
 pub struct ParsedEntity<'a> {
     node: Node<'a>,
     source: &'a str,
+    path: &'a PathBuf,
 }
 
 impl<'a> ParsedEntity<'a> {
     /// Creates a new ParsedEntity from a tree-sitter node and source text.
-    pub fn new(node: Node<'a>, source: &'a str) -> Self {
-        Self { node, source }
+    pub fn new(node: Node<'a>, source: &'a str, path: &'a PathBuf) -> Self {
+        Self { node, source, path }
     }
 
     /// Returns the entity type (e.g., "contact", "role").
@@ -53,7 +56,7 @@ impl<'a> ParsedEntity<'a> {
             // Then find field nodes within the block
             for child in block_node.children(&mut block_cursor) {
                 if child.kind() == FIELD_KIND {
-                    fields.push(ParsedField::new(child, &self.source));
+                    fields.push(ParsedField::new(child, &self.source, &self.path));
                 }
             }
         }

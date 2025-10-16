@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use tree_sitter::{Language, Parser};
 
 use super::LanguageError;
@@ -12,14 +14,14 @@ fn language() -> Language {
 ///
 /// This is the main entry point for parsing Firm DSL. It initializes
 /// a tree-sitter parser and returns ParsedSource for further processing.
-pub fn parse_source(source: String) -> Result<ParsedSource, LanguageError> {
+pub fn parse_source(source: String, path: Option<PathBuf>) -> Result<ParsedSource, LanguageError> {
     let mut parser = Parser::new();
     parser
         .set_language(&language())
         .map_err(|_| LanguageError::IncompatibleLanguageVersion)?;
 
     match parser.parse(&source, None) {
-        Some(tree) => Ok(ParsedSource::new(source, tree)),
+        Some(tree) => Ok(ParsedSource::new(source, tree, path.unwrap_or_default())),
         None => Err(LanguageError::LanguageNotInitialized),
     }
 }
@@ -38,7 +40,7 @@ mod tests {
             }
         "#;
 
-        let result = parse_source(String::from(source));
+        let result = parse_source(String::from(source), None);
         assert!(result.is_ok());
     }
 }
