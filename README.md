@@ -18,12 +18,49 @@ Version controlled, locally stored and structured as code with the Firm DSL. Thi
 - **AI-ready:** LLMs can read, write, and query your business structure.
 
 ## Installation
-The Firm CLI is available to download via Github Releases. Install scripts are provided for desktop platforms to make that process easy.
+The Firm CLI is available to download via [Github Releases](https://github.com/42futures/firm/releases/). Install scripts are provided for desktop platforms to make that process easy.
 
 ### Linux and macOS
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/42futures/firm/main/install.sh | sudo bash
 ```
+
+If you don't feel confident running it with `sudo` follow those steps:
+
+1. **Download the release**
+   - Go to [releases](https://github.com/42futures/firm/releases/)
+   - Download the appropriate archive for your operating system and architecture. If you are not sure what is your run `uname -m` in your terminal to see your arch.
+
+2. **Extract the archive**
+```bash
+   tar -xzf firm-[OS]-[ARCH].tar.gz
+```
+
+3. **Navigate to the extracted directory**
+```bash
+   cd firm-[OS]-[ARCH]
+```
+
+4. **Run the application**
+   
+   **Option A: Run from current directory**
+```bash
+   ./firm
+```
+   
+   **Option B: Install globally (recommended)**
+```bash
+   # Make executable (if needed)
+   chmod +x firm
+   
+   # Move to system PATH
+   sudo mv firm /usr/local/bin/
+   
+   # Now you can run from anywhere
+   firm
+```
+
 
 ### Windows
 ```bash
