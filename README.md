@@ -23,7 +23,7 @@ The Firm CLI is available to download via [Github Releases](https://github.com/4
 ### Linux and macOS
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/42futures/firm/main/install.sh
+curl -fsSL https://raw.githubusercontent.com/42futures/firm/main/install.sh | sudo bash
 ```
 
 If you don't feel confident running it with `sudo` follow those steps:
