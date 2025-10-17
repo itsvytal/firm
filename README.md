@@ -17,56 +17,6 @@ Version controlled, locally stored and structured as code with the Firm DSL. Thi
 - **Automate anything:** Search, report, integrate, whatever. It's just code.
 - **AI-ready:** LLMs can read, write, and query your business structure.
 
-## Installation
-The Firm CLI is available to download via [Github Releases](https://github.com/42futures/firm/releases/). Install scripts are provided for desktop platforms to make that process easy.
-
-### Linux and macOS
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/42futures/firm/main/install.sh | sudo bash
-```
-
-If you don't feel confident running it with `sudo` follow those steps:
-
-1. **Download the release**
-   - Go to [releases](https://github.com/42futures/firm/releases/)
-   - Download the appropriate archive for your operating system and architecture. If you are not sure what is your run `uname -m` in your terminal to see your arch.
-
-2. **Extract the archive**
-```bash
-   tar -xzf firm-[OS]-[ARCH].tar.gz
-```
-
-3. **Navigate to the extracted directory**
-```bash
-   cd firm-[OS]-[ARCH]
-```
-
-4. **Run the application**
-   
-   **Option A: Run from current directory**
-```bash
-   ./firm
-```
-   
-   **Option B: Install globally (recommended)**
-```bash
-   # Make executable (if needed)
-   chmod +x firm
-   
-   # Move to system PATH
-   sudo mv firm /usr/local/bin/
-   
-   # Now you can run from anywhere
-   firm
-```
-
-
-### Windows
-```bash
-irm https://raw.githubusercontent.com/42futures/firm/main/install.ps1 | iex
-```
-
 ## Getting started
 Firm operates on a "workspace": a directory containing all your `.firm` DSL files. The Firm CLI processes every file in this workspace to build a unified, queryable graph of your business.
 
@@ -154,8 +104,54 @@ Initiator ref: person.jane_smith
 Primary contact ref: contact.john_doe
 ```
 
-#### What's next
-You've seen the basic commands for interacting with a Firm workspace. The project is a work-in-progress, and you can expect to see more sophisticated features added over time, including a more powerful query engine and tools for running business workflows directly from the CLI.
+## Installation
+The Firm CLI is available to download via [Github Releases](https://github.com/42futures/firm/releases/). Install scripts are provided to make the process easy.
+
+### Linux and macOS
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/42futures/firm/main/install.sh | sudo bash
+```
+
+If you don't feel confident running it with `sudo`, you can:
+
+1. **Download the release**
+   - Go to [Github Releases](https://github.com/42futures/firm/releases/)
+   - Download the appropriate archive for your operating system and architecture. You can run `uname -m` in your terminal if you're not sure which one to pick.
+
+2. **Extract the archive**
+```bash
+tar -xzf firm-[OS]-[ARCH].tar.gz
+```
+
+3. **Navigate to the extracted directory**
+```bash
+cd firm-[OS]-[ARCH]
+```
+
+4. **Run the application**
+
+**Option A:** Run from current directory
+```bash
+./firm
+```
+
+**Option B:** Install globally (recommended)
+```bash
+# Make executable (if needed)
+chmod +x firm
+
+# Move to system PATH
+sudo mv firm /usr/local/bin/
+
+# Now you can run firm from anywhere
+firm
+```
+
+### Windows
+```bash
+irm https://raw.githubusercontent.com/42futures/firm/main/install.ps1 | iex
+```
 
 ## Using Firm as a library
 Beyond the CLI, you can integrate Firm's core logic directly into your own software using the `firm_core` and `firm_lang` Rust packages. This allows you to build more powerful automations and integrations on top of Firm.
