@@ -26,7 +26,7 @@ impl EntitySchema {
 
         // Check each field in the schema
         for (field_name, field_schema) in &self.fields {
-            match entity.fields.get(field_name) {
+            match entity.get_field(field_name) {
                 // Entity has the field: Check that it has desired type
                 Some(field_value) => {
                     let expected_type = field_schema.expected_type();

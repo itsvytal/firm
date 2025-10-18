@@ -28,7 +28,7 @@ impl TryFrom<&ParsedEntity<'_>> for Entity {
 
             entity
                 .fields
-                .insert(FieldId(field_id.to_string()), field_value);
+                .push((FieldId(field_id.to_string()), field_value));
         }
 
         Ok(entity)

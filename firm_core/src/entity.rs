@@ -1,15 +1,15 @@
 use convert_case::{Case, Casing};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fmt};
+use std::fmt;
 
-use crate::{EntityId, EntityType, FieldId, FieldValue};
+use super::{EntityId, EntityType, FieldId, FieldValue};
 
 /// Represents a business entity in the Firm graph.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Entity {
     pub id: EntityId,
     pub entity_type: EntityType,
-    pub fields: HashMap<FieldId, FieldValue>,
+    pub fields: Vec<(FieldId, FieldValue)>,
 }
 
 impl Entity {
@@ -18,7 +18,7 @@ impl Entity {
         Self {
             id: id,
             entity_type: entity_type,
-            fields: HashMap::new(),
+            fields: Vec::new(),
         }
     }
 
@@ -27,19 +27,22 @@ impl Entity {
     where
         V: Into<FieldValue>,
     {
-        self.fields.insert(id, value.into());
+        self.fields.push((id, value.into()));
         self
     }
 
     /// Try to get a entity field value for a given field ID.
     pub fn get_field(&self, id: &FieldId) -> Option<&FieldValue> {
-        self.fields.get(id)
+        self.fields
+            .iter()
+            .find(|(field_id, _)| field_id == id)
+            .map(|(_, field_value)| field_value)
     }
 }
 
 impl fmt::Display for Entity {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        writeln!(f, "ID: {}", self.id)?;
+        writeln!(f, "{}\n", self.id)?;
         for (field_id, field_value) in &self.fields {
             writeln!(
                 f,

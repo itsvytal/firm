@@ -136,10 +136,10 @@ organization main {
 }
 
 project firm_language {
-    budget = 150000 EUR
     name = "Firm Language Development"
-    organization_ref = organization.main
     owner_ref = person.daniel_rothmann
+    organization_ref = organization.main
+    budget = 150000 EUR
     technologies = ["Rust", "Tree-sitter", "WASM"]
 }
 "#;

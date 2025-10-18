@@ -29,16 +29,16 @@ mod tests {
         assert_eq!(entity.fields.len(), 3);
 
         assert_eq!(
-            entity.fields[&FieldId("name".to_string())],
-            FieldValue::String("John Doe".to_string())
+            entity.get_field(&FieldId("name".to_string())),
+            Some(&FieldValue::String("John Doe".to_string()))
         );
         assert_eq!(
-            entity.fields[&FieldId("age".to_string())],
-            FieldValue::Integer(42)
+            entity.get_field(&FieldId("age".to_string())),
+            Some(&FieldValue::Integer(42))
         );
         assert_eq!(
-            entity.fields[&FieldId("active".to_string())],
-            FieldValue::Boolean(true)
+            entity.get_field(&FieldId("active".to_string())),
+            Some(&FieldValue::Boolean(true))
         );
     }
 
@@ -58,6 +58,14 @@ mod tests {
         assert_eq!(entity.id, EntityId("organization.acme_corp".to_string()));
         assert_eq!(entity.entity_type, EntityType::new("organization"));
         assert_eq!(entity.fields.len(), 2);
+        assert_eq!(
+            entity.get_field(&FieldId("name".to_string())),
+            Some(&FieldValue::String("ACME Corporation".to_string()))
+        );
+        assert_eq!(
+            entity.get_field(&FieldId("employees".to_string())),
+            Some(&FieldValue::Integer(500))
+        );
     }
 
     #[test]
@@ -75,6 +83,15 @@ mod tests {
 
         assert_eq!(entity.id, EntityId("project.alpha_project".to_string()));
         assert_eq!(entity.entity_type, EntityType::new("project"));
+        assert_eq!(entity.fields.len(), 2);
+        assert_eq!(
+            entity.get_field(&FieldId("name".to_string())),
+            Some(&FieldValue::String("Project Alpha".to_string()))
+        );
+        assert_eq!(
+            entity.get_field(&FieldId("status".to_string())),
+            Some(&FieldValue::String("active".to_string()))
+        );
     }
 
     #[test]
@@ -95,11 +112,13 @@ mod tests {
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
         assert_eq!(
-            entity.fields[&FieldId("single_line".to_string())],
-            FieldValue::String("Simple string".to_string())
+            entity.get_field(&FieldId("single_line".to_string())),
+            Some(&FieldValue::String("Simple string".to_string()))
         );
 
-        if let FieldValue::String(multi_line) = &entity.fields[&FieldId("multi_line".to_string())] {
+        if let Some(FieldValue::String(multi_line)) =
+            entity.get_field(&FieldId("multi_line".to_string()))
+        {
             assert!(multi_line.contains("This is a"));
             assert!(multi_line.contains("multi-line string"));
         } else {
@@ -116,12 +135,12 @@ mod tests {
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
         assert_eq!(
-            entity.fields[&FieldId("integer_field".to_string())],
-            FieldValue::Integer(42)
+            entity.get_field(&FieldId("integer_field".to_string())),
+            Some(&FieldValue::Integer(42))
         );
         assert_eq!(
-            entity.fields[&FieldId("float_field".to_string())],
-            FieldValue::Float(3.14159)
+            entity.get_field(&FieldId("float_field".to_string())),
+            Some(&FieldValue::Float(3.14159))
         );
     }
 
@@ -139,12 +158,12 @@ mod tests {
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
         assert_eq!(
-            entity.fields[&FieldId("is_active".to_string())],
-            FieldValue::Boolean(true)
+            entity.get_field(&FieldId("is_active".to_string())),
+            Some(&FieldValue::Boolean(true))
         );
         assert_eq!(
-            entity.fields[&FieldId("is_deleted".to_string())],
-            FieldValue::Boolean(false)
+            entity.get_field(&FieldId("is_deleted".to_string())),
+            Some(&FieldValue::Boolean(false))
         );
     }
 
@@ -162,18 +181,18 @@ mod tests {
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
         assert_eq!(
-            entity.fields[&FieldId("total".to_string())],
-            FieldValue::Currency {
+            entity.get_field(&FieldId("total".to_string())),
+            Some(&FieldValue::Currency {
                 amount: Decimal::from_str_exact("1250.75").unwrap(),
                 currency: Currency::USD
-            }
+            })
         );
         assert_eq!(
-            entity.fields[&FieldId("deposit".to_string())],
-            FieldValue::Currency {
+            entity.get_field(&FieldId("deposit".to_string())),
+            Some(&FieldValue::Currency {
                 amount: Decimal::from_str_exact("500").unwrap(),
                 currency: Currency::EUR
-            }
+            })
         );
     }
 
@@ -191,16 +210,16 @@ mod tests {
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
         assert_eq!(
-            entity.fields[&FieldId("manager".to_string())],
-            FieldValue::Reference(ReferenceValue::Entity(EntityId(
+            entity.get_field(&FieldId("manager".to_string())),
+            Some(&FieldValue::Reference(ReferenceValue::Entity(EntityId(
                 "person.john_doe".to_string()
-            )))
+            ))))
         );
         assert_eq!(
-            entity.fields[&FieldId("company".to_string())],
-            FieldValue::Reference(ReferenceValue::Entity(EntityId(
+            entity.get_field(&FieldId("company".to_string())),
+            Some(&FieldValue::Reference(ReferenceValue::Entity(EntityId(
                 "organization.acme_corp".to_string()
-            )))
+            ))))
         );
     }
 
@@ -218,18 +237,18 @@ mod tests {
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
         assert_eq!(
-            entity.fields[&FieldId("manager_name".to_string())],
-            FieldValue::Reference(ReferenceValue::Field(
+            entity.get_field(&FieldId("manager_name".to_string())),
+            Some(&FieldValue::Reference(ReferenceValue::Field(
                 EntityId("person.john_doe".to_string()),
                 FieldId("name".to_string())
-            ))
+            )))
         );
         assert_eq!(
-            entity.fields[&FieldId("company_address".to_string())],
-            FieldValue::Reference(ReferenceValue::Field(
+            entity.get_field(&FieldId("company_address".to_string())),
+            Some(&FieldValue::Reference(ReferenceValue::Field(
                 EntityId("organization.acme_corp".to_string()),
                 FieldId("address".to_string())
-            ))
+            )))
         );
     }
 
@@ -247,7 +266,7 @@ mod tests {
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
-        if let FieldValue::List(skills) = &entity.fields[&FieldId("skills".to_string())] {
+        if let Some(FieldValue::List(skills)) = &entity.get_field(&FieldId("skills".to_string())) {
             assert_eq!(skills.len(), 3);
             assert_eq!(skills[0], FieldValue::String("Rust".to_string()));
             assert_eq!(skills[1], FieldValue::String("JavaScript".to_string()));
@@ -256,7 +275,7 @@ mod tests {
             panic!("Expected List field value for skills");
         }
 
-        if let FieldValue::List(scores) = &entity.fields[&FieldId("scores".to_string())] {
+        if let Some(FieldValue::List(scores)) = &entity.get_field(&FieldId("scores".to_string())) {
             assert_eq!(scores.len(), 3);
             assert_eq!(scores[0], FieldValue::Integer(95));
             assert_eq!(scores[1], FieldValue::Integer(87));
@@ -278,7 +297,9 @@ mod tests {
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
-        if let FieldValue::List(empty_list) = &entity.fields[&FieldId("empty_list".to_string())] {
+        if let Some(FieldValue::List(empty_list)) =
+            &entity.get_field(&FieldId("empty_list".to_string()))
+        {
             assert_eq!(empty_list.len(), 0);
         } else {
             panic!("Expected empty List field value");
@@ -297,7 +318,9 @@ mod tests {
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
-        if let FieldValue::List(outer_list) = &entity.fields[&FieldId("nested".to_string())] {
+        if let Some(FieldValue::List(outer_list)) =
+            &entity.get_field(&FieldId("nested".to_string()))
+        {
             assert_eq!(outer_list.len(), 2);
 
             if let FieldValue::List(first_inner) = &outer_list[0] {
@@ -322,7 +345,7 @@ mod tests {
         let entities = parsed.entities();
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
-        if let Some(start_time_field) = entity.fields.get(&FieldId("start_time".to_string())) {
+        if let Some(start_time_field) = entity.get_field(&FieldId("start_time".to_string())) {
             match start_time_field {
                 FieldValue::DateTime(start_time) => {
                     assert_eq!(start_time.year(), 2024);
@@ -359,12 +382,12 @@ mod tests {
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
         assert_eq!(
-            entity.fields[&FieldId("relative_path".to_string())],
-            FieldValue::Path(PathBuf::from("./my/path.txt"))
+            entity.get_field(&FieldId("relative_path".to_string())),
+            Some(&FieldValue::Path(PathBuf::from("./my/path.txt")))
         );
         assert_eq!(
-            entity.fields[&FieldId("absolute_path".to_string())],
-            FieldValue::Path(PathBuf::from("/users/me/path.txt"))
+            entity.get_field(&FieldId("absolute_path".to_string())),
+            Some(&FieldValue::Path(PathBuf::from("/users/me/path.txt")))
         );
     }
 
@@ -385,8 +408,8 @@ mod tests {
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
         assert_eq!(
-            entity.fields[&FieldId("relative_path".to_string())],
-            FieldValue::Path(PathBuf::from("./subdir/my/path.txt"))
+            entity.get_field(&FieldId("relative_path".to_string())),
+            Some(&FieldValue::Path(PathBuf::from("./subdir/my/path.txt")))
         );
     }
 
@@ -404,8 +427,8 @@ mod tests {
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
         assert_eq!(
-            entity.fields[&FieldId("relative_path".to_string())],
-            FieldValue::Path(PathBuf::from("./my/path.txt"))
+            entity.get_field(&FieldId("relative_path".to_string())),
+            Some(&FieldValue::Path(PathBuf::from("./my/path.txt")))
         );
     }
 
@@ -426,8 +449,8 @@ mod tests {
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
         assert_eq!(
-            entity.fields[&FieldId("relative_path".to_string())],
-            FieldValue::Path(PathBuf::from("./sibling/path.txt"))
+            entity.get_field(&FieldId("relative_path".to_string())),
+            Some(&FieldValue::Path(PathBuf::from("./sibling/path.txt")))
         );
     }
 
@@ -448,8 +471,8 @@ mod tests {
         let entity: Entity = (&entities[0]).try_into().unwrap();
 
         assert_eq!(
-            entity.fields[&FieldId("relative_path".to_string())],
-            FieldValue::Path(PathBuf::from("../path.txt"))
+            entity.get_field(&FieldId("relative_path".to_string())),
+            Some(&FieldValue::Path(PathBuf::from("../path.txt")))
         );
     }
 
@@ -543,23 +566,26 @@ mod tests {
 
         // Verify each field type conversion
         assert_eq!(
-            entity.fields[&FieldId("title".to_string())],
-            FieldValue::String("Software Development Agreement".to_string())
+            entity.get_field(&FieldId("title".to_string())),
+            Some(&FieldValue::String(
+                "Software Development Agreement".to_string()
+            ))
         );
         assert_eq!(
-            entity.fields[&FieldId("value".to_string())],
-            FieldValue::Currency {
+            entity.get_field(&FieldId("value".to_string())),
+            Some(&FieldValue::Currency {
                 amount: Decimal::from_str_exact("50000.00").unwrap(),
                 currency: Currency::USD
-            }
+            })
         );
         assert_eq!(
-            entity.fields[&FieldId("active".to_string())],
-            FieldValue::Boolean(true)
+            entity.get_field(&FieldId("active".to_string())),
+            Some(&FieldValue::Boolean(true))
         );
 
         // Verify list of entity references
-        if let FieldValue::List(parties) = &entity.fields[&FieldId("parties".to_string())] {
+        if let Some(FieldValue::List(parties)) = &entity.get_field(&FieldId("parties".to_string()))
+        {
             assert_eq!(parties.len(), 2);
             assert_eq!(
                 parties[0],
@@ -579,11 +605,11 @@ mod tests {
 
         // Verify field reference
         assert_eq!(
-            entity.fields[&FieldId("manager_contact".to_string())],
-            FieldValue::Reference(ReferenceValue::Field(
+            entity.get_field(&FieldId("manager_contact".to_string())),
+            Some(&FieldValue::Reference(ReferenceValue::Field(
                 EntityId("person.jane_doe".to_string()),
                 FieldId("email".to_string())
-            ))
+            )))
         );
     }
 }
