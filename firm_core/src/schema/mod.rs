@@ -22,13 +22,15 @@ pub enum FieldMode {
 pub struct FieldSchema {
     pub field_type: FieldType,
     pub field_mode: FieldMode,
+    pub order: usize,
 }
 
 impl FieldSchema {
-    pub fn new(field_type: FieldType, field_mode: FieldMode) -> Self {
+    pub fn new(field_type: FieldType, field_mode: FieldMode, order: usize) -> Self {
         FieldSchema {
             field_type,
             field_mode,
+            order,
         }
     }
 
@@ -48,6 +50,7 @@ impl FieldSchema {
 pub struct EntitySchema {
     pub entity_type: EntityType,
     pub fields: HashMap<FieldId, FieldSchema>,
+    insertion_order: u16,
 }
 
 impl EntitySchema {
@@ -56,6 +59,7 @@ impl EntitySchema {
         Self {
             entity_type: entity_type,
             fields: HashMap::new(),
+            insertion_order: 0,
         }
     }
 
@@ -65,21 +69,50 @@ impl EntitySchema {
         self
     }
 
-    /// Builder method to add a required field to the schema.
-    pub fn with_required_field(self, id: FieldId, field_type: FieldType) -> Self {
-        self.add_field_schema(id, FieldSchema::new(field_type, FieldMode::Required))
+    /// Builder method to add a raw field.
+    /// This does not preserve insertion order.
+    pub fn with_raw_field(self, id: FieldId, schema: FieldSchema) -> Self {
+        self.add_field_schema(id, schema)
     }
 
-    /// Builder method to add an optional field to the schema.
+    /// Builder method to add a required field preserving insertion order.
+    pub fn with_required_field(self, id: FieldId, field_type: FieldType) -> Self {
+        let order = self.next_order();
+        self.add_field_schema(id, FieldSchema::new(field_type, FieldMode::Required, order))
+    }
+
+    /// Builder method to add an optional field preserving insertion order.
     pub fn with_optional_field(self, id: FieldId, field_type: FieldType) -> Self {
-        self.add_field_schema(id, FieldSchema::new(field_type, FieldMode::Optional))
+        let order = self.next_order();
+        self.add_field_schema(id, FieldSchema::new(field_type, FieldMode::Optional, order))
     }
 
     /// Builder method to add common metadata fields to the schema.
     pub fn with_metadata(self) -> Self {
-        self.with_optional_field(FieldId::new("created_at"), FieldType::DateTime)
-            .with_optional_field(FieldId::new("updated_at"), FieldType::DateTime)
-            .with_optional_field(FieldId::new("notes"), FieldType::String)
+        self.with_raw_field(
+            FieldId::new("notes"),
+            FieldSchema::new(FieldType::String, FieldMode::Optional, 100),
+        )
+        .with_raw_field(
+            FieldId::new("created_at"),
+            FieldSchema::new(FieldType::DateTime, FieldMode::Optional, 101),
+        )
+        .with_raw_field(
+            FieldId::new("updated_at"),
+            FieldSchema::new(FieldType::DateTime, FieldMode::Optional, 102),
+        )
+    }
+
+    /// Get schema fields sorted by their order.
+    pub fn ordered_fields(&self) -> Vec<(&FieldId, &FieldSchema)> {
+        let mut ordered: Vec<_> = self.fields.iter().collect();
+        ordered.sort_by_key(|&(_, field_schema)| field_schema.order);
+        ordered
+    }
+
+    /// Gets the next order for a field, preserving insertion order.
+    fn next_order(&self) -> usize {
+        self.fields.len()
     }
 }
 
@@ -87,7 +120,7 @@ impl Display for EntitySchema {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         writeln!(f, "{}", self.entity_type)?;
 
-        for (field_id, field_schema) in &self.fields {
+        for (field_id, field_schema) in &self.ordered_fields() {
             writeln!(f, "\n{}", field_id)?;
             writeln!(f, "- Type: {}", field_schema.expected_type())?;
             writeln!(f, "- Required: {}", field_schema.is_required())?;

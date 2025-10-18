@@ -19,7 +19,7 @@ impl TryFrom<&ParsedSchema<'_>> for EntitySchema {
         let entity_type = EntityType::new(schema_name.to_string());
         let mut schema = EntitySchema::new(entity_type);
 
-        for field in parsed.fields() {
+        for (order, field) in parsed.fields().iter().enumerate() {
             let field_name = field
                 .name()
                 .map_err(|_| SchemaConversionError::MissingFieldName)?;
@@ -31,9 +31,9 @@ impl TryFrom<&ParsedSchema<'_>> for EntitySchema {
             let field_type = convert_field_type(&field_type_str)?;
 
             let field_schema = if field.required() {
-                FieldSchema::new(field_type, FieldMode::Required)
+                FieldSchema::new(field_type, FieldMode::Required, order)
             } else {
-                FieldSchema::new(field_type, FieldMode::Optional)
+                FieldSchema::new(field_type, FieldMode::Optional, order)
             };
 
             schema.fields.insert(FieldId(field_name), field_schema);
