@@ -10,25 +10,36 @@ mod validation_errors;
 pub use validation::ValidationResult;
 pub use validation_errors::{ValidationError, ValidationErrorType};
 
+/// Defines the mode of a field, either required or optional
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub enum FieldMode {
+    Required,
+    Optional,
+}
+
 /// Defines the schema for an unnamed field which can be either required or optional.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub enum FieldSchema {
-    Required(FieldType),
-    Optional(FieldType),
+pub struct FieldSchema {
+    pub field_type: FieldType,
+    pub field_mode: FieldMode,
 }
 
 impl FieldSchema {
+    pub fn new(field_type: FieldType, field_mode: FieldMode) -> Self {
+        FieldSchema {
+            field_type,
+            field_mode,
+        }
+    }
+
     /// Get the expected field type.
     pub fn expected_type(&self) -> &FieldType {
-        match self {
-            FieldSchema::Required(field_type) => field_type,
-            FieldSchema::Optional(field_type) => field_type,
-        }
+        &self.field_type
     }
 
     /// Check if the field is required.
     pub fn is_required(&self) -> bool {
-        matches!(self, FieldSchema::Required(_))
+        self.field_mode == FieldMode::Required
     }
 }
 
@@ -56,12 +67,12 @@ impl EntitySchema {
 
     /// Builder method to add a required field to the schema.
     pub fn with_required_field(self, id: FieldId, field_type: FieldType) -> Self {
-        self.add_field_schema(id, FieldSchema::Required(field_type))
+        self.add_field_schema(id, FieldSchema::new(field_type, FieldMode::Required))
     }
 
     /// Builder method to add an optional field to the schema.
     pub fn with_optional_field(self, id: FieldId, field_type: FieldType) -> Self {
-        self.add_field_schema(id, FieldSchema::Optional(field_type))
+        self.add_field_schema(id, FieldSchema::new(field_type, FieldMode::Optional))
     }
 
     /// Builder method to add common metadata fields to the schema.
@@ -97,13 +108,12 @@ mod tests {
             .with_optional_field(FieldId::new("email"), FieldType::String);
 
         assert_eq!(schema.entity_type, EntityType::new("person"));
-        assert_eq!(
-            schema.fields[&FieldId::new("name")],
-            FieldSchema::Required(FieldType::String)
-        );
-        assert_eq!(
-            schema.fields[&FieldId::new("email")],
-            FieldSchema::Optional(FieldType::String)
-        );
+        let name_field = &schema.fields[&FieldId::new("name")];
+        assert_eq!(name_field.field_type, FieldType::String);
+        assert_eq!(name_field.field_mode, FieldMode::Required);
+
+        let email_field = &schema.fields[&FieldId::new("email")];
+        assert_eq!(email_field.field_type, FieldType::String);
+        assert_eq!(email_field.field_mode, FieldMode::Optional);
     }
 }

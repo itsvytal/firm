@@ -1,7 +1,7 @@
 use firm_core::{
     EntityType, FieldId,
     field::FieldType,
-    schema::{EntitySchema, FieldSchema},
+    schema::{EntitySchema, FieldMode, FieldSchema},
 };
 
 use super::SchemaConversionError;
@@ -31,9 +31,9 @@ impl TryFrom<&ParsedSchema<'_>> for EntitySchema {
             let field_type = convert_field_type(&field_type_str)?;
 
             let field_schema = if field.required() {
-                FieldSchema::Required(field_type)
+                FieldSchema::new(field_type, FieldMode::Required)
             } else {
-                FieldSchema::Optional(field_type)
+                FieldSchema::new(field_type, FieldMode::Optional)
             };
 
             schema.fields.insert(FieldId(field_name), field_schema);

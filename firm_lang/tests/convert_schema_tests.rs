@@ -1,7 +1,7 @@
 use firm_core::{
     EntityType, FieldId,
     field::FieldType,
-    schema::{EntitySchema, FieldSchema},
+    schema::{EntitySchema, FieldMode},
 };
 
 use firm_lang::{convert::SchemaConversionError, parser::parse_source};
@@ -35,11 +35,13 @@ fn test_convert_simple_schema() {
 
     // Check required field
     let title_field = &schema.fields[&FieldId("title".to_string())];
-    assert_eq!(*title_field, FieldSchema::Required(FieldType::String));
+    assert_eq!(title_field.field_type, FieldType::String);
+    assert_eq!(title_field.field_mode, FieldMode::Required);
 
     // Check optional field
     let priority_field = &schema.fields[&FieldId("priority".to_string())];
-    assert_eq!(*priority_field, FieldSchema::Optional(FieldType::Integer));
+    assert_eq!(priority_field.field_type, FieldType::Integer);
+    assert_eq!(priority_field.field_mode, FieldMode::Optional);
 }
 
 #[test]
@@ -77,15 +79,18 @@ fn test_convert_schema_with_various_types() {
 
     // Check currency field
     let amount_field = &schema.fields[&FieldId("amount".to_string())];
-    assert_eq!(*amount_field, FieldSchema::Required(FieldType::Currency));
+    assert_eq!(amount_field.field_type, FieldType::Currency);
+    assert_eq!(amount_field.field_mode, FieldMode::Required);
 
     // Check boolean field
     let paid_field = &schema.fields[&FieldId("paid".to_string())];
-    assert_eq!(*paid_field, FieldSchema::Optional(FieldType::Boolean));
+    assert_eq!(paid_field.field_type, FieldType::Boolean);
+    assert_eq!(paid_field.field_mode, FieldMode::Optional);
 
     // Check datetime field
     let due_date_field = &schema.fields[&FieldId("due_date".to_string())];
-    assert_eq!(*due_date_field, FieldSchema::Required(FieldType::DateTime));
+    assert_eq!(due_date_field.field_type, FieldType::DateTime);
+    assert_eq!(due_date_field.field_mode, FieldMode::Required);
 }
 
 #[test]
