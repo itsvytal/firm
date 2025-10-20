@@ -1,6 +1,7 @@
 # Firm: Business-as-code
 A text-based work management system for technologists.
 Some changes came into the file
+and some conflict was made
 ![Firm CLI demo](media/demo.gif)
 
 ## Why?
