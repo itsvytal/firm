@@ -1,6 +1,7 @@
 # Firm: Business-as-code
 A text-based work management system for technologists.
 Readded some changes
+more changes
 ![Firm CLI demo](media/demo.gif)
 
 ## Why?
