@@ -4,6 +4,7 @@ Some changes came into the file
 and some conflict was made
 and more conflict
 and more...
+and MORE...
 ![Firm CLI demo](media/demo.gif)
 
 ## Why?
