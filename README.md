@@ -1,6 +1,6 @@
 # Firm: Business-as-code
 A text-based work management system for technologists.
-change made from remote
+made some changes from remote
 ![Firm CLI demo](media/demo.gif)
 
 ## Why?
