@@ -7,6 +7,7 @@ and more...
 and MORE...
 JAYS WIN JAYS WIN..
 more life
+some more life
 ![Firm CLI demo](media/demo.gif)
 
 ## Why?
