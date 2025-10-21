@@ -5,6 +5,7 @@ and some conflict was made
 and more conflict
 and more...
 and MORE...
+JAYS WIN JAYS WIN
 ![Firm CLI demo](media/demo.gif)
 
 ## Why?
